@@ -1,0 +1,528 @@
+------------------------------------------------------------
+1) INTRODUÇÃO:                                              |
+------------------------------------------------------------
+Alguém aqui já trabalhou com Arquitetura Limpa ou Arquitetura Hexagonal?
+Para simplificar, ao longo da apresentação vou usar apenas o termo Arquitetura Limpa.
+É importante destacar desde o início que ela não é um template de organização de pacotes.
+Na verdade, trata-se de um padrão de separação entre domínio e tecnologias, fundamentado na Inversão de Dependência, um dos princípios do SOLID.
+A ideia central é garantir que o domínio permaneça independente de frameworks, bancos, mensageria, bibliotecas ou qualquer detalhe de infraestrutura, enquanto a
+tecnologia é que passa a depender do domínio — e não o contrário.
+
+------------------------------------------------------------
+2) RIGOR:                                                   |
+------------------------------------------------------------
+O nível de rigor da Arquitetura Limpa pode variar de acordo com o contexto da aplicação. Ela pode ser aplicada apenas a frameworks, bibliotecas ou ambos. Alguns
+exemplos de níveis de rigor são:
+- Evitar apenas a infiltração do Spring Boot no domínio;
+- Permitir o uso do Spring Boot, mas impedir a dependência de bibliotecas externas dentro do domínio;
+- Seguir o nível mais estrito, mantendo o domínio completamente puro, sem qualquer anotação, framework ou dependência tecnológica.
+
+A aplicação refatorada que vamos ver hoje segue exatamente esse último nível: é totalmente restritiva — inclusive evitando Lombok dentro do domínio. Fiz isso de
+propósito apenas para demonstrar a elasticidade da Arquitetura Limpa e o cenário mais disciplinado possível. Isso não significa que adotaremos necessariamente
+esse nível máximo de rigor no dia a dia. Iremos calibrar isso no final.
+
+------------------------------------------------------------
+3) INVERSÃO DE DEPENDÊNCIA:                                 |
+------------------------------------------------------------
+O que é inversão de dependência?
+É a prática de proteger os limites do domínio usando contratos, em vez de acoplá-lo diretamente a implementações concretas.
+Em Java, isso significa que o domínio depende apenas de interfaces ou classes abstratas, nunca de classes tecnológicas como repositórios concretos, clientes de API,
+componentes do Spring ou bibliotecas externas.
+No Spring, esse princípio é aplicado de forma natural através da injeção de dependências, que permite conectar o domínio às implementações reais apenas nas camadas
+externas, mantendo o domínio completamente isolado da infraestrutura.
+
+------------------------------------------------------------
+4) INJEÇÃO DE DEPENDÊNCIA:                                  |
+------------------------------------------------------------
+O que alguém realmente ganha ao usar injeção de dependência?
+Para responder, vamos olhar primeiro um exemplo de service que não usa injeção de dependência:
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final ExternalApiClient externalApiClient;
+    private final Properties externalConfig;
+
+    public UserService() {
+
+        this.externalConfig = new Properties();
+        try (InputStream in = getClass().getResourceAsStream("/external.properties")) {
+            externalConfig.load(in);
+        } catch (IOException e) {
+            throw new RuntimeException("Falha ao carregar configuração externa", e);
+        }
+
+        this.userRepository = new JdbcUserRepository(createDataSource());
+
+        this.externalApiClient = new ExternalApiClient(
+            externalConfig.getProperty("external.url"),
+            mapper
+        );
+    }
+
+    private DataSource createDataSource() {
+        HikariDataSource ds = new HikariDataSource();
+        ds.setJdbcUrl("jdbc:postgresql://localhost:5432/app");
+        ds.setUsername("user");
+        ds.setPassword("pass");
+        return ds;
+    }
+
+    public UserDTO getUserData(String id) {
+        User user = userRepository.findById(id);
+        ExternalUserData ext = externalApiClient.fetchData(user.getDocument());
+        return new UserDTO(user, ext);
+    }
+}
+
+A minha intenção nesse service é simplesmente usar o UserRepository e o ExternalApiClient. Mas, como o Spring não gerencia essas dependências, eu acabo tendo que
+construir tudo manualmente dentro da classe:
+- Preciso criar o DataSource à mão e repassá-lo ao repositório;
+- Preciso carregar Properties, extrair configurações e montar o ExternalApiClient.
+
+Ou seja: detalhes de infraestrutura vazam para dentro do service, que deveria estar focado apenas na lógica da aplicação.
+Esse acoplamento torna o código mais difícil de evoluir, testar e manter.
+A seguir, o mesmo exemplo, agora usando injeção de dependência:
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final ExternalApiClient externalApiClient;
+
+    public UserService(UserRepository userRepository,
+                       ExternalApiClient externalApiClient) {
+        this.userRepository = userRepository;
+        this.externalApiClient = externalApiClient;
+    }
+
+    public UserDTO getUserData(String id) {
+        User user = userRepository.findById(id);
+        ExternalUserData ext = externalApiClient.fetchData(user.getDocument());
+        return new UserDTO(user, ext);
+    }
+}
+
+Todas as responsabilidades técnicas que antes estavam dentro do service passam a ser tratadas pelo Spring.
+O service recebe suas dependências prontas, limpas e abstraídas, sem conhecer implementação concreta.
+O resultado é um código mais claro, mais testável e muito mais fácil de manter ao longo do tempo.
+
+------------------------------------------------------------
+5) APRESENTAÇÃO DA APLICAÇÃO:                               |
+------------------------------------------------------------
+Agora vou mostrar a aplicação exemplo já refatorada para Arquitetura Limpa. Existem muitas maneiras válidas de organizar os pacotes e a versão apresentada
+não necessariamente reflete os pacotes finais. O que realmente deve permanecer constante é a inversão de dependência como princípio central.
+
+5.1) Visão geral dos principais pacotes e subpacotes:
+- domain: simbolizada por um hexágono no modelo hexagonal, esta camada é também conhecida como core na clean architecture. Contém as regras de negócio e o modelo
+  do domínio. Aqui não entram dependências de infraestrutura;
+- domain.model: contém os modelos do domínio (agregados e objetos de valor) que expressam regras de negócio. No livro Clean Architecture, o autor usa o termo
+  "entidade" para se referir a esses models. Para evitar confusão com entidades ORM, optei pelo termo "model". A seguir, alguns conceitos deste pacote:
+  * Agregados: estruturas de domínio que agrupam objetos relacionados sob uma única raiz (Aggregate Root), responsável por garantir a consistência do estado e
+    proteger invariantes do negócio. Toda modificação do agregado deve passar pela raiz, evitando estados inválidos ou incoerentes;
+  * Objetos de Valor: tipos imutáveis e sem identidade própria, que representam conceitos fundamentais do domínio e carregam regras próprias (ex.: CPF, CNPJ,
+    Email, Money). Dois value objects são iguais se seus valores forem iguais.
+
+- domain.service: agrupa os services (application services/interactors/use cases). Orquestram regras de negócio e comunicam-se com os providers;
+- api: chamado de input adapter no meio hexagonal e de entrypoint na clean architecture, representa a entrada do fluxo. No caso da aplicação exemplo, trata-se de
+  uma API REST;
+- provider: é conhecido como output adapter na vertente hexagonal e dataprovider na arquitetura limpa. Representa a camada de infraestrutura. Está detalhado aqui
+  o ferramental necessário à camada de domínio, como clientes de bancos de dados e APIs externas, loggers, configurações, utilitários, entre outros.
+
+* Por enquanto, vou deixar de lado os demais pacotes como shared. Voltaremos a ele em breve.
+
+5.2) Fluxo de exemplo:
+- api:
+  * SubSellerV1Controller: atua como a porta de entrada da aplicação, funcionando como um componente de infraestrutura que precede o domínio. Suas responsabilidades
+    principais são:
+    . Orquestração e Abstração: coordena a chamada para o serviço por meio da interface SubSellerService, impedindo o vazamento do domínio e garantindo que o
+      controller não execute lógica de negócio;
+    . Mapeamento: realiza validações de DTO;
+    . Validação: mapeia os dados entre DTOs e modelos de domínio;
+    . Tradução de Exceções: converte exceções de negócio em exceções especializadas de API. Em frameworks como o Spring, isso é feito através de um gerenciador de
+      exceções global, que as traduz em respostas REST padronizadas.
+
+- dominio:
+  * SubSellerServiceImpl: passou a se comunicar com interfaces ao invés de implementações concretas de serviços externos. Como o service foi integrado ao domínio,
+    ele não deve mais conhecer o Spring, tendo as annotations @Service e @Transactional removidas. Essas funcionalidades continuam a existir, mas são providas pela
+    camada de infraestrutura provider.
+
+- provider:
+  * Na arquitetura em camadas, o service está diretamente acoplado a detalhes de infraestrutura externa, como:
+    . clients de API;
+    . repositories;
+    . mapeamentos;
+    . transações;
+    . configurações.
+
+  Na Clean Architecture, criamos uma camada intermediária, os providers, que assumem essas responsabilidades e isolam o domínio. Eles representam tecnologias das
+  quais o service se abastece por meio de abstrações.
+
+- ScreeningSubSellerOutAdapter: responsável pela comunicação com o banco Oracle. Orquestra repository, specifications e mappers, isto é, todos elementos específicos
+  de persistência;
+
+- TransactionOutAdapter: gerencia transações Spring de forma programática, sem @Transactional. Ao fazer isso via porta, eliminamos completamente o acoplamento entre
+  o domínio e o mecanismo de transação do Spring;
+
+- UpmSubSellerOutAdapter, UpmFacOutAdapter e StoneageSubSellerOutAdapter: responsáveis por chamadas a APIs externas. O service não precisa conhecer o cliente HTTP
+  (no exemplo, Feign) nem detalhes de implementação;
+
+- SubSellerServiceConfiguration: é responsável por expor o service como um bean gerenciado pelo Spring, sem que o domínio precise ter qualquer anotação.
+
+------------------------------------------------------------
+6) TÓPICOS ADICIONAIS:                                      |
+------------------------------------------------------------
+6.1) VALIDAÇÃO:
+- Validação de entrada: trata da forma dos dados: obrigatoriedade, tamanho, padrão, formato e consistência sintática. É declarada nos DTOs e executada na camada de
+  controller, antes que a requisição chegue ao domínio;
+- Validação de negócio: trata das regras da aplicação, ou seja, condições que fazem parte do próprio domínio. São declaradas nos models (agregados e objetos de valor)
+  e orquestradas pelos services. Aqui devemos evitar o modelo anêmico, garantindo que a lógica permaneça no domínio, e não espalhada por controllers ou services
+  da infraestrutura.
+
+  // MODELO RICO
+  public class Order {
+
+      private BigDecimal total;
+      private boolean paid;
+
+      public Order(BigDecimal total) {
+          if (total.compareTo(BigDecimal.ZERO) <= 0) {
+              throw new IllegalArgumentException("Total inválido");
+          }
+          this.total = total;
+      }
+
+      public void pay(BigDecimal amount) {
+          if (paid) {
+              throw new IllegalStateException("Pedido já pago");
+          }
+
+          if (amount.compareTo(total) < 0) {
+              throw new IllegalArgumentException("Pagamento insuficiente");
+          }
+
+          this.paid = true;
+      }
+
+      public boolean isPaid() {
+          return paid;
+      }
+  }
+
+  // MODELO ANÊMICO
+  public class Order {
+
+      private BigDecimal total;
+      private boolean paid;
+
+      public Order(BigDecimal total) {
+          this.total = total;
+      }
+
+      public BigDecimal getTotal() {
+          return total;
+      }
+
+      public boolean isPaid() {
+          return paid;
+      }
+
+      public void setPaid(boolean paid) {
+          this.paid = paid;
+      }
+  }
+
+  public class OrderService {
+
+      public void pay(Order order, BigDecimal amount) {
+
+          // Regra equivalente ao construtor (total > 0)
+          if (order.getTotal().compareTo(BigDecimal.ZERO) <= 0) {
+              throw new IllegalArgumentException("Total inválido");
+          }
+
+          // Regra equivalente a `if (paid)`
+          if (order.isPaid()) {
+              throw new IllegalStateException("Pedido já pago");
+          }
+
+          // Regra equivalente a `if (amount < total)`
+          if (amount.compareTo(order.getTotal()) < 0) {
+              throw new IllegalArgumentException("Pagamento insuficiente");
+          }
+
+          // Regra equivalente a: this.paid = true;
+          order.setPaid(true);
+      }
+  }
+
+- Validação Cross-Model (Domain Services): quando uma regra de negócio exige a verificação simultânea de múltiplos modelos ou agregados, a validação deve ser
+  delegada a um Domain Service, evitando que uma entidade seja sobrecarregada com responsabilidades que pertencem à interação entre diferentes objetos de domínio.
+  Um exemplo clássico é o método de transferência bancária: a regra não pertence exclusivamente à conta de Débito (que valida o saldo disponível) nem à de Crédito
+  (que valida se a conta está ativa), mas sim ao processo de interatividade entre ambas, garantindo que a operação só ocorra se as condições de ambas as entidades
+  forem satisfeitas simultaneamente. A seguir, um exemplo ilustrando o conceito:
+    // Domain Service
+    public class TransferService {
+      public void transfer(Account source, Account destination, BigDecimal amount) {
+          if (source.getBalance().compareTo(amount) < 0) {
+              throw new InsufficientBalanceException("Saldo insuficiente na conta de origem");
+          }
+
+          if (!destination.isActive()) {
+              throw new InactiveAccountException("Conta de destino não pode receber transferências");
+          }
+
+          source.withdraw(amount);
+          destination.deposit(amount);
+      }
+  }
+
+6.2) DTO e MAPPING:
+- DTO:
+  . O recomendado é não permitir que DTOs vazem para o domínio, porque eles carregam preocupações que não pertencem ao núcleo da aplicação,
+    como:
+    * ocultar campos sensíveis;
+    * economizar banda;
+    * validação sintática;
+    * serialização e desserialização;
+    * documentação;
+    * normalização e formatação de dados de entrada.
+
+  . Essas preocupações são típicas de infraestrutura e borda do sistema, não do domínio;
+  . Quando possível, prefira records no lugar de Lombok para representar DTOs. Records são imutáveis, concisos, nativos do Java e deixam claro
+    que se trata de um objeto de transporte;
+  . Uma convenção de nomenclatura recomendada é "SubSellerRequest" para requisições e "SubSellerResponse" para respostas;
+  . Não deveriam ser compartilhado entre diferentes casos de uso;
+  . Quando um DTO de entrada for idêntico ao formato recebido de uma API externa, é válido questionar se ele realmente deve ser compartilhado,
+    ou seja, viver na camada shared.
+
+- MAPPING:
+  Ajustam dados de borda para o domínio e vice-versa. Estão presentes nas camadas api e provider, não devendo lidar com regras de negócio.
+  Suas responsabilidades incluem:
+  * formatação e normalização;
+  * diferenças de nomenclatura entre modelos;
+  * conversão de tipos.
+
+6.3) SRP:
+- Manutenibilidade mais segura e previsível: mudanças afetam menos código e reduzem o risco de efeitos colaterais;
+- Onboarding muito mais rápido: novos desenvolvedores entendem facilmente onde cada responsabilidade vive;
+- Testes mais simples e objetivos: classes pequenas, com responsabilidade única, exigem menos mocks e facilitam entender cenários;
+- Evolução arquitetural facilitada: separar responsabilidades permite refatorar, mover ou substituir componentes sem impacto amplo;
+- Legibilidade significativamente maior: a intenção de cada classe fica explícita, diminuindo ambiguidade e reduzindo tempo de leitura;
+- Auditoria e rastreabilidade aprimoradas: comportamentos ficam isolados, facilitando identificar quem faz o quê no fluxo de negócio.
+
+É comum que controllers, services e repositories acabem acumulando muitos métodos. Precisamos discutir qual nível de granularidade faz sentido para o time.
+Uma abordagem equilibrada é separar por domínio/contexto, evitando tanto classes gigantes quanto granularidade excessiva.
+
+6.4) UTILITÁRIO ESTÁTICO:
+- Classes utilitárias estáticas devem ser evitadas por diversas razões:
+  . O nome "Utils" é genérico demais e não comunica intenção;
+  . O sufixo é muito acolhedor, permitindo que ele acomode qualquer funcionalidade e cresça sem controle;
+  . Costumam ser estáticos, o que prejudica a testabilidade, resultando em ferramentas de workaround como PowerMock;
+  . Não permitem interfaces, ferindo o princípio de inversão de dependência. Isso os inviabiliza em uma arquitetura limpa;
+  . Não podem ser estendidos via herança, limitando sua extensibilidade;
+  . Variáveis estáticas introduzem estado global compartilhado, tornando a classe suscetível a corrupção de estado e exigindo sincronização manual em cenários
+    concorrentes;
+  . Não há controle explícito sobre o ciclo de vida da classe, como ocorre com beans gerenciados por um container; a classe permanece carregada na memória até o
+    encerramento da aplicação.
+
+- Uma alternativa mais adequada é injetar essas dependências no Spring, transformando-as em componentes reais com @Component;
+
+- Em casos de pacotes utilitários (por exemplo, com foo.util), o sufixo pode ser aceitável, desde que o conteúdo represente funções realmente
+  transversais e não regras de domínio.
+
+6.5) LOGS:
+- O tratamento de logs também segue os princípios da Arquitetura Limpa. Como o log pode ser direcionado para diferentes destinos (console, arquivo, Splunk,
+  observabilidade centralizada ou qualquer outra infraestrutura) ele é considerado uma tecnologia externa ao domínio. Por isso, o componente responsável pelo
+  logging fica localizado entre os providers, junto com outros mecanismos de comunicação externa;
+- Além disso, em Clean Architecture o domínio não deve chamar logger diretamente. O domínio apenas emite eventos de domínio, e um EventPublisher,
+  que também é um provider, decide o que fazer com esses eventos – logar, enviar a Kafka, persistir, ignorar etc. Exemplo:
+
+  // ANTI-PATTERN
+  public class SubsellerServiceImpl {
+
+      private static final Logger log =
+          LoggerFactory.getLogger(SubsellerServiceImpl.class);
+
+      public void process(Subseller s) {
+          log.info("Processando subseller {}", s.id()); // ✗ acoplamento ao SLF4J
+          ...
+      }
+  }
+
+  . O domínio depende de SLF4J (infraestrutura);
+  . Testes se tornam mais difíceis;
+  . DIP (Inversão de Dependência) é violado;
+  . O domínio perde pureza e portabilidade;
+  . Para trocar o mecanismo de log, o domínio teria que ser alterado.
+
+  // RECOMENDADO
+  public interface DomainEventPublisher {
+      void publish(DomainEvent event);
+  }
+
+  public class SubsellerProcessedEvent implements DomainEventPublisher {
+
+    private final String subsellerId;
+
+    public SubsellerProcessedEvent(String subsellerId) {
+        this.subsellerId = subsellerId;
+    }
+
+    public String subsellerId() {
+        return subsellerId;
+    }
+  }
+
+  public class SubsellerServiceImpl {
+
+    private final DomainEventPublisher publisher;
+
+    public SubsellerServiceImpl(DomainEventPublisher publisher) {
+        this.publisher = publisher;
+    }
+
+    public void process(Subseller s) {
+        // ... regra de negócio ...
+        publisher.publish(new SubsellerProcessedEvent(s.id()));
+    }
+  }
+
+  @Component
+  public class LoggingDomainEventPublisher implements DomainEventPublisher {
+
+      private static final Logger log =
+          LoggerFactory.getLogger(LoggingDomainEventPublisher.class);
+
+      @Override
+      public void publish(DomainEvent event) {
+          log.info("Domain event: {}", event); // ✔️ logging na infraestrutura
+      }
+  }
+
+  . O domínio não sabe que existe SLF4J;
+  . A infraestrutura pode trocar o log por Splunk, Kafka, CloudWatch etc;
+  . O domínio permanece 100% puro e independente;
+  . DIP é mantido.
+
+- O Risco da Fragmentação Técnica: a necessidade de isolamento fica evidente quando olhamos para a diversidade de implementações: sem essa barreira, cada time
+  poderia adotar uma biblioteca diferente e, pior, um layout de log independente. Se esses detalhes estiverem espalhados pelo domínio, qualquer mudança de
+  governança ou padronização de formato exigiria uma alteração em massa na lógica de negócio. Exemplos de layout de log:
+  . plain text:
+      2026-02-07 14:30:01 [INFO] SubSellerServiceImpl - Processando subSeller com ID: 12345 (User: Joao)
+
+  . JSON estruturado:
+    {
+      "timestamp": "2026-02-07T14:30:01Z",
+      "level": "INFO",
+      "service": "customer-api",
+      "traceId": "a1-b2-c3",
+      "message": "Processing subSeller",
+      "context": {
+        "subSellerId": "12345",
+        "operator": "João"
+      }
+    }
+
+    O isolamento protege o domínio da variabilidade de contratos de observabilidade. O domínio comunica o que aconteceu; a infraestrutura decide como estruturar
+    essa mensagem para o coletor de logs.
+
+- Embora o item foque em logging, o mesmo princípio vale para qualquer preocupação transversal (cross-cutting concerns), como:
+  . auditoria;
+  . métricas;
+  . tracing;
+  . monitoramento;
+  . envio de eventos para mensageria;
+  . notificações;
+  . persistência de histórico;
+  . telemetria;
+  . segurança;
+  . rate limiting;
+  . caching.
+
+6.6) TESTES:
+- Os testes devem espelhar a estrutura do código em src/main/java. Isso facilita navegação, organização e entendimento da cobertura de testes;
+- É importante evitar contaminar o domínio com recursos destinados apenas a testes — por exemplo, anotações do Lombok como @Builder colocadas diretamente em
+  models do domínio apenas para facilitar a criação de objetos em testes. Uma alternativa mais limpa é usar ferramentas de geração automática de objetos nos
+  testes — como Instancio — que permite criar objetos válidos sem modificar a classe de domínio. Ex.:
+
+  // EVITAR
+  PfacFilter filter = PfacFilter.builder()
+      .subsellerDocument("11111111111")
+      .pfacDocument("12345678901")
+      .institution("00000007")
+      .serviceContract(123)
+      .build();
+
+  // USAR
+  // Valores randomicos para todos os campos
+  PfacFilter filter = Instancio.create(PfacFilter.class);
+
+  // Valores personalizados para certos campos
+  PfacFilter filter = Instancio.of(PfacFilter.class)
+      .set(field("subsellerDocument"), "11111111111")
+      .set(field("pfacDocument"), "12345678901")
+      .create();
+
+------------------------------------------------------------
+7) ArchUnit:                                                |
+------------------------------------------------------------
+Como garantir que todo esse rigor não se perca com o tempo ou com a entrada de novos desenvolvedores? É aqui que entra o ArchUnit. Uma biblioteca Java para
+verificar a arquitetura do seu código através de testes unitários comuns. Ex.:
+
+  @AnalyzeClasses(packages = "com.company.subseller")
+  public class CleanArchitectureTest {
+
+    // valida @Service e @Transactional do service
+    @ArchTest
+    public static final ArchRule dominio_deve_ser_independente_de_framework = noClasses()
+        .that().resideInAPackage("..domain.service..")
+        .should().beAnnotatedWith("org.springframework.stereotype.Service")
+        .orShould().beAnnotatedWith("org.springframework.transaction.annotation.Transactional")
+        .because("O domínio não deve conhecer o framework. @Service e @Transactional " +
+             "devem ser configurados na camada de infraestrutura (provider) " +
+             "através de Beans de configuração ou OutAdapters.");
+
+    // controller nao chama provider
+    @ArchTest
+    public static final ArchRule api_nao_deve_acessar_infraestrutura = noClasses()
+        .that().resideInAPackage("..api..")
+        .should().dependOnClassesThat()
+        .resideInAPackage("..provider..")
+        .because("A API deve interagir apenas com o Domínio. Detalhes de infraestrutura devem estar ocultos.");
+
+    // implementação de logger no dominio
+    @ArchTest
+    public static final ArchRule dominio_nao_deve_chamar_logger_diretamente = noClasses()
+        .that().resideInAPackage("..domain..")
+        .should().dependOnClassesThat()
+        .resideInAnyPackage("org.slf4j..", "org.apache.logging..", "java.util.logging..")
+        .because("Logs são Cross-Cutting Concerns. O domínio deve emitir Eventos, não gerenciar Logs.");
+
+    // valida estrutura de packages
+    @ArchTest
+    public static final ArchRule camadas_devem_respeitar_hierarquia = layeredArchitecture()
+        .consideringAllDependencies()
+        .layer("API").definedBy("..api..")
+        .layer("Domain").definedBy("..domain..")
+        .layer("Provider").definedBy("..provider..")
+        .whereLayer("API").mayNotBeAccessedByAnyLayer()
+        .whereLayer("Domain").mayOnlyBeAccessedByLayers("API", "Provider")
+        .whereLayer("Provider").mayNotBeAccessedByAnyLayer();
+  }
+
+------------------------------------------------------------
+8) PERGUNTAS PARA O TIME:                                   |
+------------------------------------------------------------
+? Qual o rigor da clean arch que usaremos: livre de libs? do spring? lombok?
+? Vocês aceitam que existe 3 pontos possíveis de validação?
+? Concordam que casos de uso não deveriam ser compartilhados entre endpoints ou isso poderia ser permitido se eles fossem idênticos? Assim que surgir a primeira
+  diferença, quebraríamos em dois?
+? Deveríamos adotaro SRP em todas as classes? E no caso dos controllers, services e repositories? Deveríamos separar por domínio?
+? Vocês concordam com os nomes e com a estrutura proposta para os pacotes?
+? Mappers: concordam que não deveriam trafegar regras de negócio?
+? Log: concordam com o que foi apresentado sobre os logs?
+? Utils: concordam com uma abordagem híbrida? Packages podem se chamar utils, mas a classes não?
+? Em quais camadas usar Lombok? Quando não usar?
+? Devemos validar a arquitetura com ArchUnit?
