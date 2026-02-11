@@ -515,14 +515,23 @@ verificar a arquitetura do seu código através de testes unitários comuns. Ex.
 ------------------------------------------------------------
 8) PERGUNTAS PARA O TIME:                                   |
 ------------------------------------------------------------
-? Qual o rigor da clean arch que usaremos: livre de libs? do spring? lombok?
-? Vocês aceitam que existe 3 pontos possíveis de validação?
-? Concordam que casos de uso não deveriam ser compartilhados entre endpoints ou isso poderia ser permitido se eles fossem idênticos? Assim que surgir a primeira
-  diferença, quebraríamos em dois?
-? Deveríamos adotaro SRP em todas as classes? E no caso dos controllers, services e repositories? Deveríamos separar por domínio?
-? Vocês concordam com os nomes e com a estrutura proposta para os pacotes?
-? Mappers: concordam que não deveriam trafegar regras de negócio?
-? Log: concordam com o que foi apresentado sobre os logs?
-? Utils: concordam com uma abordagem híbrida? Packages podem se chamar utils, mas a classes não?
-? Em quais camadas usar Lombok? Quando não usar?
-? Devemos validar a arquitetura com ArchUnit?
+? fiz uma alteração nos pacotes
+? discutir nomes e estrutura dos pacotes
+? todos estão de acordo em manter o spring boot acoplado do domínio?
+? todos estão de acordo em desacoplar o domínio de tecnologias vindas de infra através de interfaces? Deveríamos abrir exceções?
+? regras de negócio:
+    - vocês aceitam que as regras de negócio são responsabilidade da camada de domínio e não deveria estar em pontos de infraestrutura, como mappers e dtos?
+    - aceitam que deveriam residir no model e ser orquestradas pelo service?s
+    - quais classes de api e infra deveriam depender do model?
+
+? acoplamento entre domínio e testes
+? discutir camada de provider
+? DTOs:
+    deveríamos permitir o reuso de DTOs entre funcionalidades? só se forem idênticos?
+? princípio da responsabilidade única:
+    o que fazer em relação a controllers, services e repositories?
+    segregar por contexto?
+
+? Utils: concordam com uma abordagem híbrida? Packages podem se chamar utils, mas as classes deveriam ter responsabilidade única e não se chamarem utils?
+
+? devemos validar a arquitetura com ArchUnit?
