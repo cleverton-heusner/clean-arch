@@ -1,0 +1,123 @@
+* Delegar ao Global Exception Handler a responsabilidade de traduzir exceções de domínio e aplicação em respostas HTTP de erro padronizadas.
+  . Vantagens:
+    - desacoplamento entre domínio e protocolo HTTP.
+
+* Cada integração via Feign deve possuir um mecanismo de tradução de erros (ex.: ErrorDecoder), responsável por converter respostas HTTP em exceções de
+  domínio ou de aplicação, sem expor detalhes de protocolo às camadas superiores.
+  . Vantagens:
+    - desacoplamento entre domínio e infraestrutura;
+    - centralização e padronização do tratamento de erros de integração.
+
+* Externalizar a documentação da API (Swagger/OpenAPI) para arquivos de propriedades, eliminando strings hardcoded.
+  . Vantagens:
+    - reuso;
+    - manutenção centralizada;
+    - maior legibilidade em controllers e DTOs;
+    - eventual necessidade de internacionalização (i18n).
+  . Ex.:
+      * Controller:
+          @Operation(
+              summary = "${api.order.create.summary}",
+              description = "${api.order.create.description}"
+          )
+          @PostMapping
+          public ResponseEntity<OrderResponse> create(@RequestBody CreateOrderRequest request) {
+              return ResponseEntity.ok(service.execute(request));
+          }
+
+      * DTO:
+          @Schema(description = "${api.order.create.request.customerId}")
+          private String customerId;
+
+* Reorganizar os DTOs da aplicação por contexto de negócio, substituindo o sufixo genérico "DTO" por "Request" e "Response", e estruturando-os preferencialmente
+  próximos às respectivas funcionalidades (ex.: order, customer), com subpacotes opcionais para entrada (request) e saída (response).
+  . Vantagens:
+    - melhorar a clareza semântica;
+    - evitar organização baseada exclusivamente em tipos técnicos;
+    - prevenção de reutilização indevida de DTOs;
+    - melhor navegação pelos projetos.
+  . Ex.:
+      order/
+        request/
+          CreateOrderRequest
+        response/
+          OrderResponse
+
+      customer/
+        request/
+          UpdateCustomerRequest
+        response/
+          CustomerResponse
+
+* Organizar os DTOs de integrações externas problemáticas em subpacotes baseados nos recursos do serviço (ex.: subseller.transaction.address, subseller.suspension),
+  . Vantagens:
+    - isolar contratos específicos;
+    - melhorar a rastreabilidade;
+    - redução de colisões de nomes de classes;
+    - drástica melhoria em legibilidade.
+  . Ex.:
+      serviceproblematico/
+        subseller/
+          transaction/
+            address/
+              SubsellerTransactionAddressRequest
+              SubsellerTransactionAddressResponse
+        suspension/
+          SubsellerSuspensionRequest
+          SubsellerSuspensionResponse
+
+* Segregar os mappers da aplicação por contexto de negócio e/ou integração, substituindo o uso de um mapper centralizado por componentes menores e coesos,
+  responsáveis por transformações específicas entre modelos.
+  . Vantagens:
+    - redução do acoplamento entre diferentes contextos;
+    - redução do risco de efeitos colaterais ao alterar conversões.
+  . Ex.:
+      order/
+        OrderMapper
+
+      customer/
+        CustomerMapper
+
+* Centralizar a política de serialização JSON no Jackson, definindo globalmente a inclusão de campos nulos (JsonInclude.Include.ALWAYS) e removendo anotações
+  locais conflitantes nos DTOs (JsonInclude.Include.NOT_NULL).
+  . Vantagens:
+    - eliminação de inconsistências na serialização de respostas;
+    - redução de duplicação de configuração no código;
+    - simplificação e limpeza dos DTOs.
+  . Ex.:
+      * arquivo properties: spring.jackson.default-property-inclusion=always
+
+      * Java:
+          @Bean
+            public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+                return builder -> builder.serializationInclusion(JsonInclude.Include.ALWAYS);
+            }
+
+* Delegar a lógica do token JWT a um filtro ao invés de mantê-la nos controllers.
+
+* Mapeamento:
+  . Epico: matar issues que não aparecem no Sonar e no Fortify;
+  . Diluir em tasks de negócio;
+  . Diluir em tasks de Sonar/Fortify;
+  . Incluir na automação da pipe.
+
+  . Confluence:
+    Listar patterns.
+
+  . Planilha:
+  +------------+--------------------+-------------------+-------------+-------------------+------------------+---------+--------------+
+  | Aplicação  | Exception Handler  | Feign Decoder     | DTO Pattern  | Jackson Global    | Swagger Props    | Mappers  | Prioridade |
+  +------------+--------------------+-------------------+-------------+-------------------+------------------+---------+--------------+
+  | app-A      |         ✅         |        ❌         |     ⚠️      |        ✅         |        ❌        |   ⚠️    |    🔴      |
+  | app-B      |         ✅         |        ✅         |     ✅      |        ✅         |        ❌        |   ❌    |    🟡      |
+  | app-C      |         ❌         |        ❌         |     ❌      |        ❌         |        ❌        |   ❌    |    🔴      |
+  | app-D      |         ⚠️         |        ❌         |     ⚠️      |        ✅         |        ⚠️        |   ❌    |    🟢      |
+  +------------+--------------------+-------------------+-------------+-------------------+------------------+---------+--------------+
+
+  ✅  Implementado
+  ⚠️  Parcial / Em andamento
+  ❌  Não implementado
+
+  🔴 Alta prioridade
+  🟡 Média prioridade
+  🟢 Baixa prioridade
