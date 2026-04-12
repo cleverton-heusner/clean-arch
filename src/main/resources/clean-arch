@@ -515,23 +515,70 @@ verificar a arquitetura do seu código através de testes unitários comuns. Ex.
 ------------------------------------------------------------
 8) PERGUNTAS PARA O TIME:                                   |
 ------------------------------------------------------------
-? fiz uma alteração nos pacotes
-? discutir nomes e estrutura dos pacotes
-? todos estão de acordo em manter o spring boot acoplado do domínio?
-? todos estão de acordo em desacoplar o domínio de tecnologias vindas de infra através de interfaces? Deveríamos abrir exceções?
-? regras de negócio:
-    - vocês aceitam que as regras de negócio são responsabilidade da camada de domínio e não deveria estar em pontos de infraestrutura, como mappers e dtos?
-    - aceitam que deveriam residir no model e ser orquestradas pelo service?s
-    - quais classes de api e infra deveriam depender do model?
+* Discutido:
+! regras de negócio:
+    - vocês aceitam que as regras de negócio são responsabilidade da camada de domínio e não deveria estar em pontos de infraestrutura, como mappers e dtos? SIM
+    - aceitam que deveriam residir no model e ser orquestradas pelo service? SIM
+! todos estão de acordo em manter o spring boot acoplado do domínio? sim
+! usar interface entre controller e service;
+! segregar controlers/services/repo por contexto ao invés de casos de uso;
+! cada camada deveria lidar com sua exception: o dataprovider transforma a exception tecnica para a de negocio e o presenter, por meio do global exception handler, transforma a exception de negócio para a tecnica de api de entrada
+! usar camada de aplicação
+
+* Proxima discussao:
+! DTOs:
+    nomenclatura: colocar sufixos requests e response em DTOs com e funcionalidade quando nos referirmos a regras de negócio isto é, fora do contexto CRUD
+    separar entre packages
+    deveríamos permitir o reuso de DTOs entre funcionalidades? só se forem idênticos? SIM
+    sufixo request e response
+    carregar funcionalidade na nomenclatura
+    levar nomenclatura de versionamento do controller pro DTO
+    incluir versionamento nos packages (nomear por intervalo também.Ex.: v1ToV2)
+    responsabilidades: mapear entre input/output e regras de negócio
+                       validar regras de entrada
+
+! exemplo de presenter -> GlobalExceptionHandler no spring boot
+! domain não conhece exceptions tecnicas. Ele mapeia para tecnicas através do presenter
+
+? exceptions:
+    o mapemanto de exceptions deve ser feito com presenters de exceptions de negócio para tecnicas
+    ? onde ficar o exception handler e o que ele faz
+    ? se a exception ocorre no dataprovider, qual o fluxo?
+    ? se a exception ocorre no negocio, qual o fluxo?
+    ? se a exception ocorre na camada de aplicação, qual o fluxo?
+
+! security:
+    dentro da camada de api
+! mappers:
+    responsabilidades
+      transformar entre entrada e modelo e vice-versa
+      formatacao. Ex.: cpfmasker invocado pelo mapper
+      quem os chama: no controller
+      usar mapstruct: vai para target e não precisa de teste
+    dentro da camada de api
+
+? camada de api
+! validation
+    dentroda camada de api
+    anotadas em dto
+    se precisar ser invocada programaticamente, fazer no controller
+! doc
+   dentro da camada de api
+
+? provider
 
 ? acoplamento entre domínio e testes
-? discutir camada de provider
-? DTOs:
-    deveríamos permitir o reuso de DTOs entre funcionalidades? só se forem idênticos?
-? princípio da responsabilidade única:
-    o que fazer em relação a controllers, services e repositories?
-    segregar por contexto?
-
+?! todos estão de acordo em desacoplar o domínio de tecnologias vindas de infra através de interfaces? Deveríamos abrir exceções?
 ? Utils: concordam com uma abordagem híbrida? Packages podem se chamar utils, mas as classes deveriam ter responsabilidade única e não se chamarem utils?
-
 ? devemos validar a arquitetura com ArchUnit?
+? colocarapi e provider em infra
+? testes:
+  validar com archunit
+  acionar o time de engenharia para evitar possivel retrabalho
+  apresentar
+
+infra
+  api e dataprovider
+
+? discutir nomes e estrutura dos pacotes
+? quais classes de api deveria depender do model?
