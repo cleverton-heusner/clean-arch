@@ -1,0 +1,1628 @@
+Prompt usado no Gemini: Vou lhe passar imagens, das quais você extrairá os textos fielmente, sem adicionar ou corrigir nada. Devolva-as em formato plaintext.
+
+ANGULAR (16.1.0):
+
+01) Introdução:
+- npm i: este comando (atalho para npm install) pressupõe a existência de um arquivo package.json no diretório em que é executado. Ele lê esse arquivo, resolve a árvore de dependências definida nas seções dependencies e devDependencies, baixa os pacotes necessários (incluindo suas dependências transitivas) e cria ou atualiza a pasta node_modules. Além disso, cria ou atualiza o arquivo package-lock.json, que registra as versões efetivamente instaladas.
+
+- ng serve: compila uma aplicação Angular e sobe um servidor web local para desenvolvimento. Alternativamente, pode ser utilizado o o comando npm run start. Equivalente em Spring Boot: ./mvnw spring-boot:run2
+
+- Node.js:
+  . servidor de aplicações JavaScript/TypeScript;
+  . já traz o npm;
+  . compatibilidade: Node.js, npm e Angular devem ser compatíveis entre si. Ref.: https://angular.dev/reference/versions
+  . NVM (Node Version Manager): uma ferramenta de linha de comando que permite instalar, gerenciar e alternar entre múltiplas versões do Node.js em uma só máquina. Seus principais usos são:
+    - instalar diferentes versões do Node.js;
+    - alternar entre versões conforme a necessidade de cada projeto;
+    - testar compatibilidade entre versões;
+    - evitar conflitos entre projetos que dependem de versões distintas do Node.js.
+
+Comandos:
+- lista as versões do Node.js instaladas, destacando a atual:   nvm list
+- exibe a versão do Node.js atualmente ativa na sessão:          node --version
+- exibe a versão do npm associada à versão atual do Node.js:     npm --version
+- ativa uma versão específica do Node.js previamente instalada: nvm use 22
+
+. Versões LTS (Long-Term Support): versões estáveis do Node.js recomendadas para uso em produção. Características:
+  - recebem correções de bugs por um longo período;
+  - recebem atualizações de segurança;
+  - possuem maior estabilidade;
+  - são amplamente suportadas pelo ecossistema (Angular, React, Vue, bibliotecas e ferramentas).
+
+- npm:
+  . gerenciador de pacotes, assim como o Maven é para o Java.
+  . arquivos:
+    * package.json: neste arquivo estão declaradas as dependências. Ex.: "@angular/common": "^19.2.0".
+      - tags:
+        . dependencies: bibliotecas a fazerem parte do bundle final da aplicação.
+        . devDependencies: bibliotecas presentes em tempo de desenvolvimento, não necessariaemnente compondo o bundle final.
+    * package-lock.json: registra as versões exatas das dependências efetivamente instaladas, incluindo tanto as dependências diretas declaradas no package.json quanto todas as dependências transitivas delas.
+  . pastas: node-modules: nesta pasta são instaladas as dependências.
+  . tipos de instalação:
+    * local ou por projeto. Ex.: npm i @angular/cli
+    * global, para todos os projetos. Ex.: npm i -g @angular/cli
+
+- Angular CLI (Command Line Interface):
+  . disponibiliza comandos que me dispariam etapas do ciclo de vida de uma aplicação Angular, como criação de projetos, geração de componentes, execução de testes, build e deploy. Cada uma dessas etapas depende de bibliotecas específicas do ecossistema Angular e das ferramentas de build configuradas pelo projeto. Por exemplo, durante o processo de build são utilizados componentes como o compilador Angular (@angular/compiler) e o Angular Compiler CLI (@angular/compiler-cli);
+  . alguns comandos:
+    * ng serve: compila a aplicação, inicia um servidor de desenvolvimento local e monitora alterações nos arquivos-fonte, recompilando a aplicação automaticamente quando necessário;
+    * ng build: gera uma versão compilada da aplicação para execução no navegador. O código TypeScript é transpilado para JavaScript, os templates Angular são compilados, os estilos são processados e o resultado é empacotado em arquivos HTML, CSS e JavaScript que podem ser interpretados pelos navegadores;
+    * compilação vs transpilação: compilação é a transformação de um código-fonte em outra forma executável por algum ambiente.
+      Ex.:
+             Java                  C              TypeScript
+              ↓                    ↓                  ↓
+       Bytecode (.class)   Código de máquina      JavaScript
+
+      A transpilação, por sua vez, é uma compilação em que a linguagem de saída continua sendo uma linguagem de alto nível. Ex.:
+          TypeScript          Sass
+              ↓                ↓
+          JavaScript          CSS
+
+- Browser:
+  . conhece nativamente apenas HTML, CSS e JavaScript.
+  . quando acessa http://localhost:4200, o navegador faz uma requisição ao servidor de desenvolvimento iniciado pelo comando 'ng serve'. O servidor retorna inicialmente o arquivo index.html. O index.html referencia os arquivos JavaScript, CSS e demais recursos gerados pelo build da aplicação Angular. O browser baixa esses arquivos, executa o JavaScript e a aplicação Angular é inicializada.
+  . Critical Rendering Path (CRP): é o processo pelo qual o navegador converte HTML, CSS e JavaScript em pixels visíveis na tela.
+
+- Instalação de Angular CLI:
+  . instalação global com a versão mais recente:   npm install -g @angular/cli
+  . instalação global com a versão especificada:   npm install -g @angular/cli@16.1.0
+  . instalação local com a versão mais recente:    npm install @angular/cli
+  . instalação local com a versão especificada:     npm install @angular/cli@16.1.0
+  . verificação da versão instalada:               ng version
+  . desinstalação global:                          npm uninstall -g @angular/cli
+  . consulta de versão:                            ng version
+  . checa onde o npm instala os executáveis globais: npm config get prefix
+  . testa o executável diretamente:                C:\Users\F8GBJ7P\AppData\Roaming\npm\ng.cmd version
+    * Obs.: para fazer uso da instalação global, o dir acima deve estar na variável PATH
+
+  . instalação global x instalação local:
+    * local:
+      + independência entre projetos;
+      + funcionamento em pipelines;
+      - maior espaço em disco;
+      - instalações repetidas.
+
+    * global:
+      + não é preciso instalar a mesma versão em cada projeto;
+      + menor consumo de disco;
+      - força projetos a mesma versão;
+      - dependência de máquina.
+
+- VS Code:
+  . atalhos:
+    * abrir o projeto no VS Code:                     code .
+    * atalho para exibir/ocultar o terminal:         ctrl + '
+    * atalho para criar um novo terminal:            ctrl + shift + '
+    * atalho para navegar entre os terminais:        ctrl + page down/up
+    * add imports faltantes:                         alt + enter
+    * remover imports não utilizados:                ctrl + .
+    * abre os atalhos:                               ctrl + k, ctrl + s
+    * alterar o atalho para comentário inline:      ctrl + k, ctrl + s, pesquise por 'Toggle Line Comment' e escolha o atalho adequado.
+    * navegar para arquivo:                          ctrl + p
+
+  . extensões recomendadas:
+    * Angular Generator: adiciona atalhos e assistentes para geração de artefatos Angular diretamente pela interface do VS Code, evitando a necessidade de executar comandos como:
+      ng g c dashboard
+      ng g s game
+
+    Para criar componentes, serviços, guards, pipes, módulos etc.
+
+    * Angular Language Service: fornece inteligência de código para projetos Angular:
+      - autocomplete em templates HTML;
+      - navegação para definições;
+      - validação de bindings;
+      - detecção de erros em templates;
+      - sugestões de propriedades e componentes;
+      - refatorações.
+
+  . ativando o terminal: Terminal > New Terminal.
+
+- npx:
+  . é uma ferramenta distribuída com o npm que localiza e executa binários fornecidos por pacotes npm sem que seja necessário conhecer ou informar o diretório onde eles estão instalados. Por exemplo, após instalar a Angular CLI localmente com 'npm install @angular/cli', é possível executar 'npx ng version', 'npx ng new meu-projeto' ou 'npx ng serve' sem precisar invocar diretamente o executável em node_modules/.bin. Da mesma forma, ferramentas como Jest (npx jest) e ESLint (npx eslint .) podem ser executadas independentemente de sua localização física, o que evita instalações globais e reduz problemas de versão entre projetos.
+    * Ref.: https://docs.npmjs.com/cli/v8/commands/npx
+
+- Criação de novo projeto:
+  * criação de novo projeto:                      ng new nome-projeto
+  * criação de novo projeto com parâmetros:        ng new nome-projeto --ssr=false --style=scss
+    Ref.: https://angular.dev/cli/new
+
+  * criação de novo projeto com npx:               npx ng new 01-componentes
+  * folhas de estilo oferecidas durante criação do projeto: opte por Sass (SCSS)
+    Ref.: https://sass-lang.com/documentation/
+
+  * lista versões de uma dada dependência no registry do npm: npm view @csstools/css-calc versions
+  * localização do script ng no package.json:
+    "scripts": {
+      "ng": "ng"
+    }
+
+02) Componentes: unidades reutilizáveis que agrupam estrutura (HTML), estilos (CSS) e lógica (TypeScript). Podendo ser estáticos ou dinâmicos, servem para:
+  . promover reutilização;
+  . encapsular responsabilidades;
+  . facilitar manutenção;
+  . compor interfaces complexas a partir de partes menores.
+
+- Criação de um componente via Angular CLI: npx ng g c card
+
+- Decorator: recurso da linguagem TypeScript que permite adicionar metadados a uma classe, método, propriedade ou parâmetro. O Angular aproveita esse mecanismo para identificar elementos do framework. É similar aos stereotypes do Spring Boot. Não deve ser confundido com o pattern GoF decorator.
+
+- Parâmetros de @Component:
+  . selector: tag HTML que representa o componente. Exemplo: selector: 'app-card'
+    exemplo de uso em template: <app-card></app-card>
+
+  . styles: permite definir inline regras de apresentação visual do componente (CSS) diretamente dentro do decorator, sem a necessidade de um arquivo CSS ou SCSS separado. O atributo é um array de blocos CSS. Recomendado apenas para componentes muito pequenos. Ex.:
+    @Component({
+      selector: 'app-card',
+      styles: [`
+        .card {
+          background-color: red;
+        }
+      `]
+    })
+    export class CardComponent {}
+
+  Os blocos são concatenados e o navegador aplica as regras normais de CSS. Em caso de conflito entre seletores de mesma especificidade, a última declaração possui precedência. Ex.:
+    styles: [
+      `.card { color: red; }`,
+      `.card { color: blue; }`
+    ]
+
+  Prevalece:
+  .card {
+    color: blue;
+  }
+
+  Embora não recomendado, o atributo styles pode ser utilizado juntamente com styleUrls. Se forem definidas propriedades complementares, estas serão combinadas. Se forem conflitantes, prevalecerá o que for injetado por último no DOM, respeitando a ordem de declaração dos atributos dentro do decorator @Component e as regras de cascata do CSS.
+
+  . styleUrls: aponta para os arquivos CSS/SCSS do componente. Exemplo: styleUrls: ['./card.component.scss']
+  . templateUrl: aponta para o arquivo HTML do componente. Exemplo: templateUrl: './card.component.html'
+  . template: permite definir o HTML do componente diretamente dentro do decorator, sem a necessidade de um arquivo .html separado. Recomendado apenas para templates muito pequenos. Caso ambos sejam declarados simultaneamente, o Angular considera o template inline (template) prioritário em relação ao templateUrl. Ex.:
+    @Component({
+      selector: 'app-card',
+      template: `
+        <div class="card">
+          <h1>Plano Simples</h1>
+        </div>`
+    })
+    export class CardComponent {}
+
+  O comando permite criar um componente já contendo o HTML inline no atributo template.:
+  npx ng g c my-inline-component --inline-template
+
+03) Módulos: agrupamento lógico de componentes, serviços e demais artefatos relacionados a uma mesma funcionalidade da aplicação.
+    Seus objetivos:
+    . organizar o código;
+    . separar responsabilidades;
+    . facilitar manutenção;
+    . permitir evolução independente das funcionalidades.
+
+- Comando para criação de módulo via Angular CLI: npx ng g m cards.
+- Ao criar um componente, ele deverá ser declarado em um módulo por meio do atributo 'declarations'. Ex.:
+    @NgModule({
+      declarations: [
+        AppComponent,
+        CardComponent
+      ]
+    })
+
+  O Angular CLI automatiza esse mapeamento após a execução do comando 'npx ng g c component-name'. Além disso, um componente não deve aparecer sob o atributo imports.
+
+- @NgModule: decorator responsável por definir um módulo Angular. Propriedades:
+  . declarations: componentes, diretivas e pipes pertencentes ao módulo.
+  . imports: outros módulos utilizados por este módulo. Ex.:
+      imports: [
+        BrowserModule,
+        FormsModule,
+        HttpClientModule
+      ]
+
+  . providers: serviços disponibilizados pelo mecanismo de injeção de dependência.
+  . bootstrap: componente raiz que inicia a interface da aplicação.
+  . exports: elementos do módulo que podem ser utilizados por outros módulos.
+
+- Cada componente deve pertencer a um módulo, mas não necessariamente ao AppModule.
+- AppModule é o módulo raiz da aplicação, sendo o primeiro módulo carregado durante o bootstrap da aplicação.
+- Comando para gerar um componente especificando o módulo: npx ng g c card-button-cancel --module cards
+
+04) Interpolação:
+- O template HTML pode acessar propriedades e métodos da classe TypeScript do componente.
+- A sintaxe {{ }} representa uma interpolação.
+- Podem ser interpolados:
+  * atributos/propriedades. Ex.: {{ nome }}
+  * expressões.             Ex.: {{ idade + 10 }}
+  * retornos de métodos.     Ex.: {{ obterNome() }}
+
+- Alterações nos dados do componente podem ser refletidas automaticamente no template através do mecanismo de data binding do Angular.
+- A interpolação é apenas uma forma de binding. Outras formas incluem:
+  * Property Binding
+  * Event Binding
+  * Two-Way Binding
+
+- Valores null e undefined são renderizados como texto vazio no template.
+- Acesso a propriedades de objetos: {{ pessoa.nome }}, {{ pessoa.endereco.cidade }}
+- Operador optional chaining: evita erro quando um objeto pode ser null ou undefined). Ex.: {{ pessoa?.endereco?.cidade }}
+- Acesso a elementos de arrays: {{ jogos[0] }}, {{ jogos[0].nome }}
+- Chamadas de métodos: {{ obterNomeCompleto() }}
+  Embora permitido, deve-se ter cautela por motivos de performance. Durante o mecanismo de Change Detection, o Angular pode reavaliar a expressão diversas vezes. Isso significa que métodos utilizados na interpolação podem ser executados repetidamente.
+
+- Combinação de Optional Chaining com operador ternário: {{ pessoa?.nome ? pessoa.nome : 'Nome não informado' }}
+  Embora expressões sejam permitidas na interpolação, deve-se evitar lógica excessivamente complexa dentro de {{ }} para manter o template legível e facilitar a manutenção.
+
+05) styleUrls:
+- No array 'styleUrls', os arquivos listados por último têm maior precedência e substituem os anteriores se os seletores forem iguais. Porém, se o seletor de um dos primeiros arquivos for mais específico, ele quebrará essa ordem e terá prioridade. No CSS, a especificidade do seletor sempre manda mais do que a ordem de carregamento dos arquivos.
+
+- Adotar um arquivo único de estilo por componente ao invés de segmentá-lo no array styleUrls é aconselhável por eliminar a complexidade invisível da precedência de carregamento. Isso ajuda a blindar o projeto contra erros humanos gerados por conflitos mefidentais de especificidade CSS. Essa centralização reduz drasticamente a carga cognitiva da equipe durante a manutenção, torna a depuração no navegador imediata e respeita o princípio de responsabilidade única do Angular, onde cada componente mefide sua própria interface de forma isolada, previsível e altamente escalável.
+
+06) Tag style:
+- A tag <style> declarada diretamente dentro do arquivo HTML (template) do componente terá precedência sobre os estilos importados via styleUrls ou styles no TypeScript, desde que os seletores tenham exatamente o mesmo peso ou especificidade.
+
+07) @import:
+- Regra introduzida no CSS2 com o propósito de permitir que uma folha de estilo importe outra. A seguir, alguns exemplos:
+7.1) Exemplo de import usando caminho absoluto:
+Crie o arquivo scr/styles/_cores.scss, contendo o conteúdo abaixo:
+$cor-fundo-card: #2d2d2d
+
+No arquivo meu-componente.component.scss:
+@import 'src/styles/cores';
+
+.card {
+  background-color: $cor-fundo-card;
+}
+
+* O sublinhado (_) no início de um arquivo SCSS indica que ele é um partial, o que significa que o compilador do Sass deve ignorá-lo e não gerar um arquivo CSS isolado para ele.
+
+7.2) Exemplo de import com escopo global, sem depender de paths absolutos ou relativos:
+Abra o arquivo angular.json. Localize a chave 'architect', depois 'build' e entre em 'options'. Adicione o seguinte bloco:
+"stylePreprocessorOptions": {
+  "includePaths": [
+    "src/styles"
+  ]
+}
+
+Desta vez, o import referenciará apenas o nome do arquivo, sem o prefixo '_' e a extensão '.scss'.
+
+08) ng-deep:
+- Permite que um componente pai aplique estilos a elementos internos de componentes descendentes.
+- Por padrão, o Angular utiliza View Encapsulation, impedindo que os estilos de um componente vazem para outros componentes.
+- Em razão do View Encapsulation, um arquivo .scss de um componente pai normalmente não consegue alcançar elementos internos de componentes filhos.
+- O seletor ::ng-deep perfura o View Encapsulation, permitindo que os estilos atravessem os limites entre componentes. Ex.:
+  :host ::ng-deep .mat-button {
+    color: red;
+  }
+
+- Como rompe o encapsulamento, o Angular trata a regra como um estilo global durante a geração do CSS. Consequentemente, um uso descuidado de ::ng-deep pode afetar componentes fora da árvore originalmente pretendida. Para reduzir esse efeito colateral, custuma-se combiná-lo com :host. Ex.:
+  :host ::ng-deep .mat-button {
+    color: red;
+  }
+
+Nesse caso, o host atua como delimitador da árvore de componentes afetada pela regra.
+
+- Se a intenção for aplicar um estilo global à aplicação inteira, não faz sentido utilizar ::ng-deep. O mais adequado é declarar a regra em um local global, como 'src/styles.scss'. Ex.:
+  .mat-button {
+    color: red;
+  }
+
+09) Seletor host:
+- Host é a representação estrutural de um componente Angular na árvore DOM.
+- Quando utilizado em conjunto com ::ng-deep, ajuda a limitar o alcance dos estilos aos componentes descendentes do componente atual, evitando que a regra se comporte como um estilo global para toda a aplicação.
+
+10) Angular Material:
+- Instalação: npx ng add @angular/material
+- Import do módulo:
+  import { MatSliderModule } from '@angular/material/slider';
+  imports: [
+    MatSliderModule
+  ]
+
+11) View Encapsulation:
+- None:
+  . Remove o encapsulamento de estilos do componente. Ex.:
+    @Component({
+      encapsulation: ViewEncapsulation.None
+    })
+
+  . Os estilos definidos no componente passam a ter escopo global e podem afetar qualquer elemento compatível da aplicação.
+  . O comportamento torna-se semelhante ao de declarar os estilos em: src/styles.scss
+  . Como não existe encapsulamento a ser perfurado, o uso de ::ng-deep deixa de ter utilidade prática.
+  . Apesar de possível, geralmente é preferível utilizar styles.scss para estilos verdadeiramente globais.
+
+- Emulated:
+  . Valor padrão do Angular. Quando não especificado, é o modo utilizado pelo framework. Ex.:
+    @Component({
+      encapsulation: ViewEncapsulation.Emulated
+    })
+
+    ou
+
+    @Component({...})
+
+  . Os estilos definidos no componente ficam restritos ao seu template e não vazam para outros componentes.
+  . Estilos globais continuam podendo afetar os elementos do componente, desde que os seletores sejam compatíveis.
+  . Para atravessar esse encapsulamento local, pode-se utilizar recursos como 'ng-deep' ou 'ViewEncapsulation.None'.
+
+- ShadowDom:
+  . Utiliza o Shadow DOM nativo do navegador.
+  . Estilos do componente não vazam para fora.
+  . Estilos externos e globais não conseguem acessar o conteúdo interno do componente.
+  . Cria uma barreira de encapsulamento real entre o componente e o restante da aplicação.
+  . O ::ng-deep não atravessa essa barreira e, portanto, não consegue estilizar componentes protegidos por Shadow DOM.
+
+12) Atributos vs Propriedades de um elemento HTML:
+- Atributos:
+  . Informações declaradas na tag de um elemento HTML.
+  . Influenciam comportamento, aparência, identificação ou integração do elemento com JavaScript e CSS.
+  . São especificados no HTML e interpretados pelo navegador durante a renderização da página.
+  . Geralmente seguem o formato nome="valor". Ex.:
+    <input type="text" disabled>
+    <img src="logo.png" alt="lass="container">
+
+  . Podem ser globais ou específicos a determinados elementos.
+  . Atributos de eventos: associam uma ação JavaScript à ocorrência de um evento. São disparados em resposta à interação do usuário ou a eventos do navegador. Ex.:
+    <button onclick="salvar()">Salvar</button>
+
+  . Atributos de apenas leitura: o usuário consegue visualizar e enviar o valor, mas não consegue modificá-lo. Ex.:
+    <input value="123" readonly>
+
+- Propriedades:
+  . Durante a renderização da página, o navegador cria uma árvore de objetos JavaScript que representa os elementos HTML. Essa estrutura é conhecida como DOM (Document Object Model).
+  . Os elementos da página podem ser acessados e manipulados programaticamente por meio da API do DOM, cujo ponto de entrada é o objeto document.
+  . Cada elemento HTML é representado por um objeto JavaScript contendo propriedades, métodos e eventos. Ex.:
+    * HTML:
+      <input id="name" value="João">
+    * JavaScript:
+      const input = document.getElementById("name");
+
+      Propriedades:
+      input.id
+      input.value
+
+  . Embora muitas propriedades representem atributos HTML, seus nomes nem sempre são iguais. Ex.:
+
+    * Atributo HTML | Propriedade DOM
+    --------------------------------
+    class           className
+    for             htmlFor
+    readonly        readOnly
+    tabindex        tabIndex
+
+  . Em geral, atributos representam a configuração inicial definida no HTML, enquanto propriedades representam o estado atual do elemento no navegador.
+
+13) Property Binding:
+- Binding: mecanismo utilizado pelo Angular para conectar a classe TypeScript do componente ao template, permitindo a troca de informações entre o modelo da aplicação e a interface. O Angular oferece diferentes formas de binding, cada uma com uma direção específica de fluxo de dados:
+  . Interpolação:
+    Sintaxe: {{ valor }}
+    Fluxo:   DOM ← TS
+
+  . Property Binding:
+    Sintaxe: [propriedade]="valor"
+    Fluxo:   DOM ← TS
+
+  . Event Binding:
+    Sintaxe: (evento)="acao()"
+    Fluxo:   DOM → TS
+
+  . Two-Way Binding:
+    Sintaxe: [(ngModel)]="valor"
+    Fluxo:   DOM ↔ TS
+
+- O Property Binding é utilizado para atribuir valores a propriedades dos objetos DOM criados pelo navegador a partir dos elementos HTML renderizados. Por esse motivo, o Angular não realiza o binding sobre atributos HTML, mas sobre as propriedades JavaScript associadas aos elementos da página. Ex.:
+  <input [value]="inputText">
+
+  Neste caso, o Angular atribui o valor de 'inputText' do TS à propriedade DOM 'input.value'.
+
+- No navegador é possível visualizar essas propriedades através das DevTools: Elements → selecionar elemento → Properties
+- O fluxo de dados é unidirecional.
+- Alterações posteriores realizadas pelo usuário no elemento HTML não alteram automaticamente a propriedade TypeScript. Para capturar alterações do usuário é necessário utilizar Event Binding ou Two-Way Binding.
+
+- A expressão utilizada no Property Binding pode conter:
+  . propriedades:     [disabled]="isLoading"
+  . expressões:       [disabled]="items.length === 0"
+  . acesso a objetos: [value]="user.name"
+  . optional chaining: [value]="user?.name"
+  . ternários:        [value]="user ? user.name : ''"
+  . chamadas de métodos: [disabled]="isFormInvalid()"
+
+- Embora chamadas de métodos sejam permitidas, deve-se ter cautela com desempenho. Durante o mecanismo de Change Detection, o Angular pode reavaliar a expressão diversas vezes. Se o método executar lógica pesada, isso poderá impactar a performance da aplicação. Sempre que possível, prefira propriedades pré-calculadas. A seguir, um mau exemplo:
+  <button [disabled]="getTotal() === 0">
+    Comprar
+  </button>
+  // Na expressao, o método getTotal() é invocado inúmeras vezes.
+
+14) Event Binding:
+- Mecanismo utilizado pelo Angular para permitir que eventos ocorridos na interface sejam capturados e processados pela classe TypeScript do componente.
+- Sintaxe: (evento)="expressao"
+- Fluxo:   DOM → TS
+- O Angular utiliza o nome do evento DOM sem o prefixo 'on' e o envolve com parênteses. Ex.:
+  . onclick → (click)
+  . onchange → (change)
+  . onkeyup → (keyup)
+  . oninput → (input)
+  . onfocus → (focus)
+
+- $event: variável especial disponibilizada pelo Angular em Event Bindings que fornece acesso ao objeto do evento disparado pelo navegador, permitindo consultar informações sobre o evento ocorrido, o elemento que o originou e os dados específicos associados à interação do usuário. Ex.:
+  . HTML:
+    <input (input)="onInput($event)">
+  . TS:
+    public onInput(event: Event): void {
+      const value = (event.target as HTMLInputElement).value;
+      console.log(value);
+    }
+
+15) Attribute Binding:
+- Mecanismo utilizado pelo Angular para atribuir valores a atributos HTML quando não existe uma propriedade DOM correspondente ou quando se deseja atuar explicitamente no atributo.
+- Sintaxe: [attr.nome-do-atributo]="expressao"
+- Fluxo:   DOM ← TS
+- Quando a expressão resulta em 'null' ou 'undefined', o atributo não é renderizado.
+- Attribute Binding é utilizado para atributos HTML para os quais o Angular não oferece um Property Binding equivalente. Ex.:
+  [disabled]="isLoading"       ✔ recomendado
+  [attr.disabled]="isLoading"  ⚠ desnecessário
+
+16) CSS Style Binding:
+- CSS Style Binding é o mecanismo utilizado pelo Angular para definir dinamicamente o valor de uma propriedade CSS a partir de uma expressão TypeScript.
+- Sintaxe: [style.propriedade-css]="expressao"
+- Fluxo:   DOM ← TS
+- Algumas propriedades aceitam unidades. Ex.:
+    [style.width.px]="300"
+    [style.height.px]="100"
+    [style.font-size.px]="18"
+- É possível aplicar vários Style Bindings simultaneamente:
+    <div
+      [style.color]="textColor"
+      [style.background-color]="backgroundColor"
+      [style.font-size.px]="fontSize">
+    </div>
+- Use CSS Style Binding quando apenas uma ou poucas propriedades CSS precisarem variar dinamicamente. Do contrário, prefere-se utilizar Class Binding.
+
+17) CSS Class Binding:
+- Mecanismo utilizado pelo Angular para adicionar, remover ou alternar classes CSS dinamicamente em um elemento com base em uma expressão TypeScript.
+- Sintaxe: [class.nome-da-classe]="expressao"
+- Fluxo:   DOM ← TS
+- A classe será adicionada ao elemento quando a expressão resultar em true e removida quando resultar em false.
+- É possível combinar classes estáticas e dinâmicas. Ex.:
+    <button
+      class="btn"
+      [class.btn-primary]="isPrimary">
+      Salvar
+    </button>
+
+18) Decorator @Input:
+- @Input é o decorator utilizado para declarar que uma propriedade de um componente filho pode receber um valor fornecido pelo componente pai. Em outras palavras, @Input define um ponto de entrada de dados no componente filho.
+
+- Fluxo:
+    Componente Pai
+          ↓
+    Property Binding
+          ↓
+    Componente Filho
+
+- O componente pai passa o valor utilizando Property Binding na tag do componente filho. O componente filho, por sua vez, declara quais valores aceita receber através de propriedades decoradas com @Input. Ex.:
+    // Template do componente pai
+    <app-card
+      [title]="planTitle"
+      [price]="planPrice">
+    </app-card>
+
+    // TS do componente filho
+    export class CardComponent {
+      @Input()
+      public title: string = '';
+
+      @Input()
+      public price: number = 0;
+    }
+
+    'title' e 'price' são propriedades internas do componente filho, mas seus valores são definidos externamente pelo componente pai.
+
+- O valor recebido via @Input pode ser utilizado normalmente no template do componente filho.
+- Alterar diretamente um valor recebido via @Input dentro do componente filho não altera automaticamente a propriedade original existente no componente pai.
+- É possível definir um alias para o Input. Ex.:
+    @Input('plan-title')
+    public title: string = '';
+
+- Em Angular 16, um Input pode ser marcado como obrigatório. Ex.:
+    @Input({ required: true })
+    public title!: string;
+
+19) Decorator @Output:
+- @Output declara um evento customizado emitido pelo componente filho e capturado pelo componente pai. Enquanto @Input permite entrada de dados no componente filho, @Output permite saída de eventos do componente filho para o componente pai.
+
+- Fluxo:
+    Componente Filho
+          ↓
+    EventEmitter.emit(...)
+          ↓
+    Event Binding
+          ↓
+    Componente Pai
+
+- O @Output é usado quando o componente filho precisa comunicar ao pai que alguma ação ocorreu. Ex.:
+  . clique em botão
+  . seleção de item
+  . remoção de registro
+  . confirmação de ação
+  . alteração de estado interno relevante para o pai
+
+- No componente filho, a propriedade decorada com @Output normalmente é uma instância de EventEmitter. O método emit() dispara o evento para o componente pai. Ex.:
+    // Componente filho
+    @Output()
+    public purchase: EventEmitter<void> = new EventEmitter<void>();
+    public onPurchaseClick(): void {
+      this.purchase.emit();
+    }
+
+    // Template filho
+    <button (click)="onPurchaseClick()">
+      Comprar
+    </button>
+
+    // Template pai
+    <app-card
+      (purchase)="onPurchase()">
+    </app-card>
+
+    'purchase' é o evento exposto pelo componente filho e onPurchase() é o método executado no componente pai quando o filho emite o evento.
+
+- O @Output pode emitir dados junto com o evento. O valor passado ao emit() chega ao componente pai através de '$event'. Ex.:
+    // Componente filho
+    export class CardComponent {
+      @Input()
+      public title: string = '';
+
+      @Output('purchase-click')
+      public purchase: EventEmitter<string> = new EventEmitter<string>();
+
+      public onPurchaseClick(): void {
+        this.purchase.emit(this.title);
+      }
+    }
+
+    // Template filho
+    <button (click)="onPurchaseClick()">
+      Comprar
+    </button>
+
+    // Template pai
+    <app-card
+      [title]="planTitle"
+      (purchase-click)="onPurchase($event)">
+    </app-card>
+
+    // Componente pai:
+    export class AppComponent {
+      public planTitle: string = 'Plano Premium';
+
+      public onPurchase(event: string): void {
+        console.log('Plano comprado:', event);
+      }
+    }
+
+- O @Output não deve ser usado para o filho alterar diretamente o estado do pai. O filho apenas emite um evento; quem decide o que fazer com esse evento é o pai.
+- É possível definir alias para um Output. Ex.:
+    // Filho
+    @Output('purchase-click')
+    public purchase: EventEmitter<void> = new EventEmitter<void>();
+
+    // Pai
+    <app-card
+      (purchase-click)="onPurchase()">
+    </app-card>
+
+20) @Input com Get e Set:
+- @Input pode ser aplicado sobre um setter para interceptar o valor fornecido pelo componente pai antes de armazená-lo internamente no componente filho. Tipicamente, ao receber o valor externo via @Input, o componete filho executa alguma lógica de normalização, conversão ou atualização derivada, e armazena o resultado em uma propriedade interna. Ex.:
+    // Componente pai
+    export class AppComponent {
+      public planTitle: string = '  Plano Premium  ';
+
+      public changePlanTitle(): void {
+        this.planTitle = '  Plano Enterprise  ';
+      }
+    }
+
+    // Template pai
+    <app-card
+      #card
+      [title]="planTitle">
+    </app-card>
+
+    <hr>
+
+    <p>
+      Valor original no pai: {{ planTitle }}
+    </p>
+
+    <p>
+      Valor exposto pelo filho via template variable: {{ card.title }}
+    </p>
+
+    <p>
+      Quantidade de caracteres no título tratado pelo filho: {{ card.titleLength }}
+    </p>
+
+    <button (click)="changePlanTitle()">
+      Alterar plano
+    </button>
+
+// Componente filho
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-card',
+  templateUrl: './card.component.html',
+  styleUrls: ['./card.component.scss']
+})
+export class CardComponent {
+  private _title: string = '';
+
+  @Input()
+  public set title(value: string) {
+    this._title = value.trim().toUpperCase();
+  }
+
+  public get title(): string {
+    return this._title;
+  }
+
+  public get titleLength(): number {
+    return this._title.length;
+  }
+}
+
+// Template filho
+<div class="card">
+  <h2>{{ title }}</h2>
+
+  <p>
+    Caracteres: {{ titleLength }}
+  </p>
+</div>
+
+'title' é a propriedade pública exposta ao componente pai. '_title' é o campo interno utilizado pelo componente filho para armazenar o valor tratado.
+
+- O setter é executado sempre que o Angular atribui um novo valor ao @Input. Isso ocorre:
+  . na primeira atribuição feita pelo pai;
+  . nas atualizações posteriores do binding, quando o valor do pai muda.
+
+- O getter permite que o próprio componente filho continue acessando a propriedade de forma natural.
+
+- O setter é útil quando o valor recebido precisa produzir algum efeito interno imediato no componente filho, tal como:
+  . normalizar texto
+  . converter valor
+  . atualizar uma propriedade derivada
+  . preparar dados para exibição
+  . encapsular o armazenamento interno do valor recebido.
+
+- Fluxo:
+    Componente Pai
+          ↓
+    Property Binding
+          ↓
+    Setter do @Input no Componente Filho
+          ↓
+    Propriedade interna do Componente Filho
+
+21) Propriedade Transform de @Input:
+- É uma propriedade de configuração do @Input que permite transformar o valor recebido do componente pai antes que ele seja atribuído à propriedade do componente filho. A função de transformação recebe o valor fornecido externamente e retorna o valor que será efetivamente atribuído ao Input. Ex.:
+    function normalizeTitle(value: string): string {
+      return value.trim().toUpperCase();
+    }
+
+    @Input({ transform: normalizeTitle })
+    public title: string = '';
+
+- Fluxo:
+    Componente Pai
+          ↓
+    Property Binding
+          ↓
+    transform(...)
+          ↓
+    Propriedade @Input do Componente Filho
+
+- O transform é útil para normalizações simples e previsíveis, como:
+  . remover espaços
+  . converter texto
+  . converter valores para boolean
+  . converter valores para number
+  . aplicar valor padrão
+  . padronizar dados recebidos pelo componente
+
+22) Two Way Data Binding:
+- Sincroniza uma propriedade do componente TypeScript com um controle do template.
+- Fluxo:
+    Componente
+        ↕
+    Template
+
+  . Combina dois fluxos unidirecionais:
+    * Property Binding ou [ ]: Template ← Componente
+    * Event Binding ou ( ):    Template → Componente
+
+- A diretiva 'ngModel', importada através de FormsModule, é responsável por encapsular a comunicação entre o valor do componente e o valor do controle HTML, criando internamente um FormControl associado ao elemento. A documentação oficial descreve NgModel como uma diretiva que cria uma instância de FormControl a partir do modelo e a vincula a um elemento de formulário. Ex.:
+    <input [ngModel]="name">
+
+- O evento 'ngModelChange' é emitido pela diretiva NgModel quando o valor do controle é atualizado a partir da interação do usuário. Ex.:
+    <input (ngModelChange)="name = $event">
+
+- A sintaxe abreviada do par '[ngModel]="name"' e '(ngModelChange)="name = $event"' é '[(ngModel)]="propriedade"'. Este formato é conhecido informalmente como 'banana in a box', pois combina colchetes e parênteses: [()]. Quando a intenção for apenas manter a propriedade sincronizada com o input, deve ser utilizada a sintaxe 'banana in box'. Quando for necessário executar lógica adicional ao invés da simples atribuição direta, a sintaxe mais verbosa deve ser adotada. Ex.:
+  1) Sintaxe [()]:
+     // Componente
+     export class AppComponent {
+       public nome: string = 'Cleverton';
+     }
+
+     // Template
+     <input [(ngModel)]="nome">
+     <p>{{ nome }}</p>
+
+  2) Sintaxe expandida:
+     // Componente
+     export class AppComponent {
+       public nome: string = 'Cleverton';
+       public atualizarNome(valor: string): void {
+         this.nome = valor.trim().toUpperCase();
+       }
+     }
+
+     // Template
+     <input
+       [ngModel]="nome"
+       (ngModelChange)="atualizarNome($event)">
+     <p>{{ nome }}</p>
+
+- O comportamento padrão do ngModel é atualizar o modelo no modo "change". Esse comportamento pode ser configurado com ngModelOptions. Ex.:
+    <input [(ngModel)]="name" [ngModelOptions]="{ updateOn: 'blur' }">
+    Os valores suportados são: change, blur e submit.
+
+23) ngIf:
+- O '*ngIf' altera a estrutura física da árvore do DOM, adicionando ou removendo dinamicamente o elemento hospedeiro e todos os seus nós filhos com base na avaliação de uma expressão booleana.
+- O '*' é um syntactic sugar. Por baixo dos panos, o Angular expande a sintaxe para um elemento de template explicito utilizando o property binding [ngIf]:
+    // O que você escreve:
+    <div *ngIf="condicao">Conteúdo</div>
+
+    // O que o Angular interpreta:
+    <ng-template [ngIf]="condicao">
+      <div>Conteúdo</div>
+    </ng-template>
+
+- A remoção estrutural pelo Angular é completamente diferente das abordagens do CSS. O CSS apenas altera a renderização, enquanto o *ngIf altera a existência do nó no DOM:
+     ---------------------------------------------------------
+    |                    | Está no DOM | Ocupa Espaço na Tela |
+     --------------------------------------------------------
+    | *ngIf="false"      |     X       |         X            |
+    | display: none      |     O       |         X            |
+    | visibility: hidden |     O       |         O            |
+    | [hidden]="true"    |     O       |         X            |
+    ----------------------------------------------------------
+
+- O Angular não permite aplicar mais de uma diretiva estrutural (como *ngIf e *ngFor) no mesmo elemento HTML. A solução é encapsular a diretiva externa dentro de um <ng-container>, aplicando a outra no elemento filho. Isso resolve o aninhamento lógico sem adicionar tags extras ao DOM final.
+- Coerção de Tipos (Truthy vs. Falsy): O *ngIf converte automaticamente o resultado da expressão fornecida para um valor booleano (type coercion). A seguir, a classificação dos valores:
+  . Truthy:
+      * true
+      * {}
+      * []
+      * qualquer número diferente de 0
+      * qualquer texto não vazio
+
+  . Falsy:
+      false
+      0
+      -0
+      NaN
+      string vazia ("" ou '')
+      null
+      undefined
+
+- ng-template: cria um bloco de HTML invisível, guardado na memória. O código dentro dela não é renderizado na tela por padrão. Serve para:
+    . Criar o bloco else (ou then) do *ngIf:
+      // Define o trecho de HTML que o *ngIf só vai chamar se a condição for falsa
+      <ng-template #blocoEsgotado>
+        <p>Produto esgotado</p>
+      </ng-template>
+
+    . Reutilizar blocos de HTML no mesmo arquivo:
+      // O bloco fica guardado até ser invocado por outra diretiva (ex: ngTemplateOutlet)
+      <ng-template #iconeSucesso>
+        <span class="icon">✔️ Sucesso!</span>
+      </ng-template>
+
+- ng-container: tag nativa do Angular usada apenas para agrupar código e aplicar diretivas (*ngIf, *ngFor), sem criar nenhuma tag no HTML final do navegador:
+    . Exemplo 1: Evitando poluição de HTML:
+      // Aplica o *ngIf sem precisar criar uma <div> que poluiria o layout/CSS
+      <ng-container *ngIf="usuarioLogado">
+        <h1>Olá, João</h1>
+        <p>Perfil ativo</p>
+      </ng-container>
+
+    . Exemplo 2: Resolvendo a regra de "Apenas 1 Diretiva Estrutural por Elemento":
+      <!-- O <ng-container> segura o *ngFor para que o <div> use o *ngIf -->
+      <ng-container *ngFor="let item of lista">
+        <div *ngIf="item.ativo">
+          {{ item.nome }}
+        </div>
+      </ng-container>
+
+- O *ngIf tradicional apenas habilita/desabilita o elemento onde ele está inserido. Mas quando precisamos de fluxos de decisão, utilizamos o *ngIf combinado com variáveis de referência (#nomeVariavel) apontando para blocos <ng-template>:
+    . Caso 1: O Padrão else (Condição Verdadeira no Elemento, Falsa no Template)
+        <p *ngIf="estaLogado; else blocoDeslogado">
+          Bem-vindo de volta!
+        </p>
+
+        <ng-template #blocoDeslogado>
+          <p>Você precisa fazer login para acessar.</p>
+        </ng-template>
+
+    . Caso 2: O Padrão then e else com <ng-container> (Isolamento Total):
+        <ng-container *ngIf="carregando; then templateCarregando else templateConteudo"></ng-container>
+
+        <!-- Blocos de visualização guardados na memória: -->
+        <ng-template #templateCarregando>
+          <div class="spinner">⏳ Carregando dados...</div>
+        </ng-template>
+
+        <ng-template #templateConteudo>
+          <div class="card">
+            <h2>Dados carregados com sucesso!</h2>
+          </div>
+        </ng-template>
+
+24) ngFor:
+- É uma diretiva estrutural que itera sobre uma coleção e replica o elemento hospedeiro no DOM para cada item presente nessa lista.
+- Sintaxe: o Angular expõe variáveis de contexto dentro do loop que podem ser aliadas a variáveis locais:
+    <div *ngFor="
+      let item of items;
+      let i = index;
+      let isOdd = odd;
+      let isEven = even;
+      let isFirst = first;
+      let isLast = last
+    ">
+      <p>Índice: {{ i }} | Nome: {{ item.nome }}</p>
+      <span *ngIf="isFirst">Primeiro item</span>
+      <span *ngIf="isLast">Último item</span>
+    </div>
+
+    . let item of items: atribui o elemento atual da iteração à variável item.
+    . index (número): posição baseada em zero do item atual na coleção.
+    . first (booleano): retorna true apenas se o item for o primeiro da coleção.
+    . last (booleano): retorna true apenas se o item for o último da coleção.
+    . even (booleano): retorna true se o índice atual for um número par.
+    . odd (booleano): retorna true se o índice atual for um número ímpar.
+
+- Quando usado em componentes filhos personalizados, a diretiva *ngFor instância e renderiza o componente filho N vezes, passando os dados do item iterado através do @Input():
+    // Template pai:
+    <h2>Lista de Produtos</h2>
+
+    <!-- O *ngFor instancia o componente filho N vezes -->
+    <app-card-item
+      *ngFor="let item of listaProdutos; let i = index"
+      [produto]="item"
+      [posicao]="i">
+    </app-card-item>
+
+    // Componente pai
+    import { Component } from '@angular/core';
+
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html'
+    })
+    export class AppComponent {
+      listaProdutos = [
+        { nome: 'Teclado Mecânico', preco: 250 },
+        { nome: 'Mouse Gamer', preco: 120 },
+        { nome: 'Monitor 144Hz', preco: 1100 }
+      ];
+    }
+
+    // Template filho
+    <div class="card">
+      <span>#{{ posicao + 1 }} - {{ produto.nome }}</span>
+      <strong>R$ {{ produto.preco }}</strong>
+    </div>
+
+    // Componente filho
+    import { Component, Input } from '@angular/core';
+
+    @Component({
+      selector: 'app-card-item',
+      templateUrl: './card-item.component.html'
+    })
+    export class CardItemComponent {
+      // Recebe um item individual vindo do loop do componente pai
+      @Input({ required: true }) produto: { nome: string; preco: number };
+      @Input({ required: true }) posicao: number;
+    }
+
+25) ngStyle:
+- Sendo uma versão legada de '[style]', recebe um objeto TypeScript onde as chaves são as propriedades CSS e os valores são as expressões computadas:
+    // Objeto literal direto no HTML
+    <div [ngStyle]="{ 'color': corTexto, 'font-size': tamanhoFonte + 'px', 'font-weight': 'bold' }">
+      Texto Estilizado
+    </div>
+
+    // Objeto vindo de um método ou propriedade do TypeScript
+    <div [ngStyle]="obterEstilos()">
+      Texto Estilizado
+    </div>
+
+- Comparando abordagens:
+   ------------------------------------------------------
+  | Abordagem    |        Uso             | Performance  |
+   ------------------------------------------------------
+  | [style.prop] | Propriedade única      |  alta        |
+  | [style]      | Múltiplas propriedades |  média       |
+  | [ngStyle]    | Múltiplas propriedades |  alta        |
+   ------------------------------------------------------
+
+26) ngClass:
+- Versão legada de '[class]', ngClass gerencia o conjunto de classes aplicadas a um elemento HTML:
+    // Template
+    <button [ngClass]="classesDoComponente">Enviar</button>
+
+    // Componente
+    @Component({
+      selector: 'app-root',
+      templateUrl: './app.component.html'
+    })
+    export class AppComponent {
+      // Binding de duas ou mais classes através de uma única propriedade no TS:
+      classesDoComponente = {
+        'btn': true,
+        'btn-large': true,
+        'btn-active': this.isSucesso
+      };
+    }
+
+- Comparando abordagens:
+   ---------------------------------------------------------------------------------------------------------------
+  |    Abordagem     |    Classe individual    | String / Array / Objeto | Múltiplas Classes como Chave do Objeto |
+   ---------------------------------------------------------------------------------------------------------------
+  | class.className] |         Sim             |          Não            |                  Não                   |
+  | [class]          |         Não             |          Sim            |                  Não                   |
+  | [ngClass]        |         Não             |          Sim            |                  Sim                   |
+   ---------------------------------------------------------------------------------------------------------------
+
+  // Template
+  <!-- 1. Classe única -->
+  <button [class.sucesso]="isSucesso">Classe Única</button>
+
+  <!-- 2. [class] Nativo -->
+  <button [class]="classesDoComponente">Objeto TS</button>
+  <button [class]="classesString">String TS</button>
+  <button [class]="classesArray">Array TS</button>
+  <button [class]="isSucesso ? 'btn btn-large' : 'btn-danger'">Ternário</button>
+  <button [class]="{ 'btn': true, 'btn-large': isAtivo }">Objeto Inline</button>
+
+  <!-- 3. [ngClass] -->
+  <button [ngClass]="classesDoComponente">Objeto TS</button>
+  <button [ngClass]="classesCompostas">Chave Composta TS</button>
+  <button [ngClass]="{ 'btn btn-large': isSucesso }">Chave Composta Inline</button>
+  <button [ngClass]="classesString">String TS</button>
+  <button [ngClass]="classesArray">Array TS</button>
+
+  // Componente:
+  @Component({
+    selector: 'app-root',
+    templateUrl: './app.component.html'
+  })
+  export class AppComponent {
+    isSucesso = true;
+    isErro = false;
+    isAtivo = true;
+
+    classesDoComponente = {
+      'btn': true,
+      'btn-large': true,
+      'btn-active': this.isSucesso
+    };
+
+    classesCompostas = {
+      'btn btn-large btn-success': this.isSucesso,
+      'btn btn-disabled': this.isErro
+    };
+
+    classesString = 'btn btn-primary btn-lg';
+    classesArray = ['btn', 'btn-outline', 'active'];
+  }
+
+27) Pipes:
+- Recurso utilizado para transformar valores diretamente no template HTML antes de exibi-los ao usuário, sem alterar o dado original no arquivo TypeScript (.ts).
+- Há uma coleção nativa de pipes utilitários:
+  . uppercase / lowercase / titlecase: Formatação de caixa de texto.
+  . json: Converte objetos/arrays em string JSON formatada (ótimo para depuração no HTML).
+  . date: Formatação de datas ({{ dataAtual | date:'dd/MM/yyyy' }}).
+  . currency / percent / decimal: Formatação numérica e de moedas.
+
+  <!-- Exemplos -->
+  <p>{{ usuario.nome | uppercase }}</p>
+  <pre>{{ objetoComplexo | json }}</pre>
+
+- Pipes x Invocação de métodos:
+Ao invocar um método direto no template, o Angular é forçado a reexecutá-lo em todos os ciclos de Change Detection — a cada clique, scroll ou evento da página —, pois não consegue detectar se o retorno mudou, o que compromete gravemente a performance em chamadas complexas. Em contrapartida, os Pipes puros resolvem esse gargalo utilizando cache: a transformação só é reexecutada se a referência do valor de entrada mudar de fato, reutilizando o resultado anterior caso o dado permaneça o mesmo. Além desse ganho expressivo de desempenho, os Pipes oferecem modularidade por serem estruturas isoladas e reutilizáveis em qualquer parte do sistema, mantendo a formatação visual desacoplada das regras de negócio do componente.
+
+- Para a criação de um pipe customizado:
+  27.1) O pipe implementa a interface PipeTransform e usa o decorator @Pipe():
+    import { Pipe, PipeTransform } from '@angular/core';
+
+    @Pipe({
+      name: 'truncarTexto',
+      standalone: true // Se estiver usando componentes Standalone
+    })
+    export class TruncarTextoPipe implements PipeTransform {
+      // O método transform é obrigatório
+      transform(val: string, limite: number = 10): string {
+        if (!val) return '';
+        return val.length > limite ? val.substring(0, limite) + '...' : val;
+      }
+    }
+
+  27.2) Em seguida, invocá-lo no template:
+    <!-- Usa o valor padrão (10 caracteres) -->
+    <p>{{ textoLongo | truncarTexto }}</p>
+
+    <!-- Passa o limite de 20 como argumento -->
+    <p>{{ textoLongo | truncarTexto:20 }}</p>
+
+* A partir do próximo capítulo, utilize a stack abaixo:
+  Angular/cli = 17.0.0
+  NodeJS = 18.20.8 (LTS) ou 20.19.0 (LTS)
+
+  Por quê?
+
+28) Variáveis de Template:
+- É um ponteiro declarado no HTML (com o prefixo #) que armazena a referência direta da instância de um nó do DOM, componente ou diretiva do Angular, expondo suas propriedades e métodos públicos para o restante do template ou para a classe do componente.
+- Usos:
+  . Comunicação entre elementos do template:
+      <input #campoTexto type="text" value="Angular">
+      <p>Valor digitado: {{ campoTexto.value }}</p>
+
+  . Envio da referência do elemento para o componente:
+     <input #campoBusca type="text">
+     <button (click)="filtrar(campoBusca)">Buscar</button>
+
+  . Definição de blocos condicionais com <ng-template>:
+      <div *ngIf="carregado; else blocoCarregando">
+        Conteúdo Pronto!
+      </div>
+
+      <ng-template #blocoCarregando>
+        <p>Carregando dados...</p>
+      </ng-template>
+
+- Ao enviar uma variável de template como argumento em um evento no HTML, o método da classe TypeScript recebe a instância direta da referência — seja o nó nativo do DOM (Ex.: HTMLElement), a instância de um Componente ou de uma Diretiva:
+    // Template
+    <input #campoNome type="text">
+    <button (click)="processarInput(campoNome)">Processar</button>
+
+    // Componente
+    processarInput(elemento: HTMLInputElement): void {
+      const valorExtraido: string = elemento.value;
+      console.log('Valor do input:', valorExtraido);
+    }
+
+- A visibilidade de uma variável de template segue as seguintes regras hierárquicas:
+  . Elementos filhos: conseguem acessar variáveis declaradas em elementos ancestrais:
+      <input #inputAncestral type="text" value="Dado do Pai">
+      <div *ngIf="exibir">
+        <p>Lendo do ancestral: {{ inputAncestral.value }}</p>
+      </div>
+
+  . Elementos irmãos: conseguem acessar variáveis declaradas entre si:
+      <input #inputIrmao type="password" value="123456">
+
+      <button (click)="inputIrmao.type = (inputIrmao.type === 'password' ? 'text' : 'password')">
+        Alternar Senha
+      </button>
+
+  . Elementos pai: não conseguem acessar variáveis declaradas dentro de seus descendentes:
+      <div class="container-pai">
+
+        <div *ngIf="exibir">
+          <input #inputDescendente type="text" value="Dado Interno">
+        </div>
+
+        <p>Tentativa de acesso do pai que resultará em erro de compilacao: {{ inputDescendente.value }}</p>
+      </div>
+
+29) @ViewChild:
+- decorador usado para obter a referência da primeira ocorrência de um elemento HTML nativo, componente filho, diretiva ou <ng-template> contido no próprio template do componente. Seu retorno dependerá do alvo capturado, a saber:
+    ----------------------------------------------------------------
+   | Elemento Capturado   | Retorno                                 |
+    ----------------------------------------------------------------
+   | Elemento HTML nativo | ElementRef                              |
+   | Componente Filho     | instância da classe do componente filho |
+   | Diretiva             | instância da classe da diretiva         |
+   | <ng-template>        | TemplateRef                             |
+    ----------------------------------------------------------------
+
+- Elemento HTML nativo: captura a tag HTML marcada com #var e a entrega dentro do objeto ElementRef. A tag real do navegador fica acessível em .nativeElement após a tela carregar (hook ngAfterViewInit).
+    // Template
+    <input #meuInput type="text">
+
+    // Componente
+    @ViewChild('meuInput') campoInput!: ElementRef<HTMLInputElement>;
+
+    ngAfterViewInit() {
+      this.campoInput.nativeElement.focus();
+    }
+
+- Diretiva: localiza a tag HTML onde foi aplicada a diretiva e entrega a instância da classe da mesma, permitindo executar seus métodos e manipular o seu elemento hospedeiro.
+    // Diretiva
+    @Directive({ selector: '[trocaCor]' })
+    export class CorDirective {
+      constructor(private el: ElementRef<HTMLElement>) {}
+
+      mudarCor(cor: string): void {
+        this.el.nativeElement.style.color = cor;
+      }
+    }
+
+    // Template
+    <p trocaCor>Texto do parágrafo</p>
+    <button (click)="mudarCorTexto()">Mudar Cor</button>
+
+    // Componente
+    @Component({ ... })
+    export class AppComponent {
+      @ViewChild(CorDirective) diretiva!: CorDirective;
+
+      mudarCorTexto(): void {
+        this.diretiva.mudarCor('red');
+      }
+    }
+
+- Componente Filho: localiza a tag do filho no template e entrega a instância da classe do filho, dando acesso direto aos seus métodos e estados públicos.
+    // Componente/Template Filho
+    @Component({
+      selector: 'app-contador',
+      template: `<span>{{ total }}</span>`
+    })
+    export class ContadorComponent {
+      total = 0;
+      somar(): void { this.total++; }
+    }
+
+    // Template Pai
+    <app-contador></app-contador>
+    <button (click)="clique()">Somar no Filho</button>
+
+    // Componente Pai
+    @Component({ ... })
+    export class PaiComponent {
+      @ViewChild(ContadorComponent) filho!: ContadorComponent;
+
+      clique(): void {
+        this.filho.somar();
+      }
+    }
+
+- <ng-template>: ?
+
+30) @ViewChildren:
+- decorador utilizado para obter uma coleção reativa e atualizada contendo as referências de todas as ocorrências de elementos HTML nativos, componentes filhos, diretivas ou <ng-template> presentes no próprio template do componente. Em vez de retornar um único elemento, ele retorna uma QueryList, cujo tipo genérico varia conforme o alvo capturado:
+    ----------------------------------------------------------------
+   | Elemento Capturado   | Retorno                                 |
+    ----------------------------------------------------------------
+   | Elemento HTML nativo | QueryList<ElementRef<T>>                |
+   | Componente Filho     | QueryList<NomeDoComponenteFilho>        |
+   | Diretiva             | QueryList<NomeDaDiretiva>               |
+   | <ng-template>        | QueryList<TemplateRef<C>>               |
+    ----------------------------------------------------------------
+
+- Elemento HTML nativo:
+    // Template
+    <input #campo type="text" value="Valor 1">
+    <input #campo type="text" value="Valor 2">
+    <input #campo type="text" value="Valor 3">
+
+    <button (click)="limparTudo()">Limpar Todos</button>
+
+    // Componente:
+    @Component({ ... })
+    export class AppComponent {
+      @ViewChildren('campo') campos!: QueryList<ElementRef<HTMLInputElement>>;
+
+      limparTudo(): void {
+        this.campos.forEach(campo => {
+          campo.nativeElement.value = '';
+        });
+      }
+    }
+
+- Componente Filho:
+  // Componente/Template Filho
+  @Component({
+    selector: 'app-contador',
+    template: `<span>{{ total }}</span>`
+  })
+  export class ContadorComponent {
+    total = 0;
+    resetar(): void { this.total = 0; }
+  }
+
+  // Template Pai
+  <app-contador></app-contador>
+  <app-contador></app-contador>
+  <app-contador></app-contador>
+
+  <button (click)="resetarFilhos()">Resetar Todos</button>
+
+  // Componente Pai
+  @Component({ ... })
+  export class PaiComponent {
+    @ViewChildren(ContadorComponent) contadores!: QueryList<ContadorComponent>;
+
+    resetarFilhos(): void {
+      this.contadores.forEach(contador => contador.resetar());
+    }
+  }
+
+- Diretiva:
+    // Diretiva
+    @Directive({ selector: '[trocaCor]' })
+    export class CorDirective {
+      constructor(private el: ElementRef<HTMLElement>) {}
+
+      mudarCor(cor: string): void {
+        this.el.nativeElement.style.color = cor;
+      }
+    }
+
+    // Template
+    <p trocaCor>Parágrafo 1</p>
+    <p trocaCor>Parágrafo 2</p>
+    <p trocaCor>Parágrafo 3</p>
+
+    <button (click)="aplicarCor()">Colorir Todos</button>
+
+    // Componente
+    @Component({ ... })
+    export class AppComponent {
+      @ViewChildren(CorDirective) diretivas!: QueryList<CorDirective>;
+
+      aplicarCor(): void {
+        this.diretivas.forEach(d => d.mudarCor('red'));
+      }
+    }
+
+- <ng-template>:
+    // Template
+    <ng-template #meuTpl let-txt="texto">
+      <p>Aba 1: {{ txt }}</p>
+    </ng-template>
+
+    <ng-template #meuTpl let-txt="texto">
+      <p>Aba 2: {{ txt }}</p>
+    </ng-template>
+
+    <div #container></div>
+    <button (click)="renderizarPrimeiro()">Renderizar Apenas o Primeiro</button>
+
+    // Componente
+    interface Contexto {
+      texto: string;
+    }
+
+    @Component({ ... })
+    export class AppComponent {
+      @ViewChildren('meuTpl') templates!: QueryList<TemplateRef<Contexto>>;
+      @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
+
+      renderizarPrimeiro(): void {
+        this.container.clear();
+        const primeiroTpl = this.templates.first;
+
+        if (primeiroTpl) {
+          this.container.createEmbeddedView(primeiroTpl, { texto: 'Conteúdo Injetado' });
+        }
+      }
+    }
+
+- Reatividade: a reatividade do QueryList acontece através da propriedade changes, que é um Observable. Sempre que a estrutura do DOM muda (por exemplo, quando um *ngFor adiciona ou remove elementos), o Angular atualiza o QueryList e dispara o .changes automaticamente.
+    // Template
+    <button (click)="adicionar()">Adicionar Item</button>
+    <button (click)="remover()">Remover Item</button>
+
+    <ul><li *ngFor="let item of lista" #itemRef>{{ item }}</li></ul>
+    <p>Total de elementos no DOM: {{ total }}</p>
+
+    // Componente
+    @Component({ ... })
+    export class AppComponent implements AfterViewInit, OnDestroy {
+      lista = ['Item 1', 'Item 2'];
+      total = 0;
+      private sub!: Subscription;
+      @ViewChildren('itemRef') itens!: QueryList<ElementRef<HTMLLIElement>>;
+
+      ngAfterViewInit(): void {
+        this.total = this.itens.length;
+	this.sub = this.itens.changes.subscribe((listaAtualizada: QueryList<ElementRef<HTMLLIElement>>) => {
+          this.total = listaAtualizada.length;
+          console.log('O DOM mudou! Nova quantidade:', listaAtualizada.length);
+        });
+      }
+
+      adicionar(): void {
+        this.lista.push(`Item ${this.lista.length + 1}`);
+      }
+
+      remover(): void {
+        this.lista.pop();
+      }
+
+      ngOnDestroy(): void {
+        this.sub?.unsubscribe();
+      }
+    }
+
+31) Diretivas:
+- classes marcadas com o decorador @Directive com o propósito manipular o comportamento, a aparência ou a estrutura de elementos do DOM. São aplicadas nos templates HTML por meio do seu seletor e, assim como os componentes, devem ser obrigatoriamente registradas dentro do array declarations do @NgModule no módulo em que forem utilizadas:
+    // Diretiva
+    @Directive({
+      selector: '[appFundoAmarelo]'
+    })
+    export class FundoAmareloDirective implements OnInit {
+
+      constructor(private el: ElementRef<HTMLElement>) {}
+
+      ngOnInit(): void {
+        this.el.nativeElement.style.backgroundColor = 'yellow';
+      }
+    }
+
+    // Template
+    <p appFundoAmarelo>Este parágrafo terá o fundo amarelo.</p>
+
+    // Registro em Modulo
+    @NgModule({
+      declarations: [
+        AppComponent,
+        FundoAmareloDirective
+      ]
+    })
+    export class AppModule { }
+
+- motivações:
+  . Reutilização de código: permite aplicar a mesma regra de negócio/comportamento visual em múltiplos elementos da aplicação.
+  . Separação de responsabilidades: isolam a lógica de manipulação direta da interface, evitando sobrecarregar a classe do componente.
+  . Padronização: garante consistência comportamental e visual no projeto.
+
+- comando para criar uma diretiva: npx ng c d nome-diretiva
+
+- @HostBinding: mapeia uma propriedade, estilo ou atributo do elemento hospedeiro para uma variável da diretiva. Quando essa variável muda no TypeScript, o Angular atualiza o elemento no DOM automaticamente:
+    // Diretiva
+    @Directive({
+      selector: '[appTextoColorido]'
+    })
+    export class TextoColoridoDirective implements OnInit {
+
+      @HostBinding('style.color') corDoTexto = 'black';
+
+      ngOnInit(): void {
+        this.corDoTexto = 'blue';
+      }
+    }
+
+    // Template
+    <p appTextoColorido>Este texto ficará azul.</p>
+
+- @HostListener: escuta eventos disparados pelo elemento hospedeiro (como click, mouseenter, keydown) e executa um método da diretiva quando o evento ocorre:
+    // Diretiva
+    @Directive({
+      selector: '[appAlertaClique]'
+    })
+    export class AlertaCliqueDirective {
+
+      @HostListener('click', ['$event'])
+      aoClicar(event: MouseEvent): void {
+        console.log('Elemento clicado!', event);
+      }
+    }
+
+    // Template
+    <button appAlertaClique>Clique em mim</button>
+
+- Passagem de parâmetros:
+  . Para passar dados para uma diretiva, utilizamos o decorador @Input() na propriedade da classe da diretiva e fazemos a atribuição no elemento HTML onde a diretiva foi aplicada:
+      // Diretiva
+      @Directive({
+        selector: '[appDestaque]'
+      })
+      export class DestaqueDirective {
+        @Input() cor = 'yellow';
+
+        constructor(private el: ElementRef<HTMLElement>) {}
+
+        ngOnInit(): void {
+          this.el.nativeElement.style.backgroundColor = this.cor;
+        }
+      }
+
+      // Template
+      <p appDestaque [cor]="'lightblue'">Texto com fundo azul claro</p>
+
+ . Ao atribuir ao decorador @Input o mesmo nome do seletor da diretiva, o Angular unifica a aplicação da diretiva e a passagem do seu parâmetro principal em um único atributo HTML, proporcionando uma sintaxe mais limpa e conveniente ao eliminar a necessidade de declarar o seletor e a propriedade de forma separada no template:
+      // Diretiva
+      @Directive({
+        selector: '[appDestaque]'
+      })
+      export class DestaqueDirective {
+        @Input() appDestaque = 'yellow';
+      }
+
+      // Template
+      <p [appDestaque]="'red'">Texto com fundo vermelho</p>
+
+  . Para receber múltiplos parâmetros, a diretiva pode ter um @Input() com o mesmo nome do seletor (para o parâmetro principal) e outros @Input() adicionais para as demais configurações:
+      // Diretiva
+      @Directive({
+        selector: '[appDestaque]'
+      })
+      export class DestaqueDirective {
+        @Input() appDestaque = 'yellow';
+        @Input() tamanhoFonte = '16px';
+        @Input() corTexto = 'black';
+
+        constructor(private el: ElementRef<HTMLElement>) {}
+
+        ngOnInit(): void {
+          const style = this.el.nativeElement.style;
+          style.backgroundColor = this.appDestaque;
+          style.fontSize = this.tamanhoFonte;
+          style.color = this.corTexto;
+        }
+      }
+
+      // Template
+      <p [appDestaque]="'purple'" [tamanhoFonte]="'24px'" [corTexto]="'white'">
+        Texto personalizado
+      </p>
+
+  . O parâmetro pode ser enviado ao template de duas formas:
+    * Como String estática: passa um valor de texto fixo diretamente. Não é avaliado como código TypeScript:
+        <p appDestaque="red">Texto estático</p>
+
+    * Via Property Binding: avalia a expressão passada entre aspas como código TypeScript. Permite passar variáveis do componente, números, booleanos ou strings entre aspas simples:
+        <p [appDestaque]="corFavorita">Texto dinâmico</p>
+        <p [appDestaque]="'green'">Texto estático com binding</p>
+
+32) ElementRef:
+- classe wrapper que envolve um elemento HTML nativo do DOM e fornece acesso direto a ele por meio da sua propriedade interna nativeElement. Esse acesso ao elemento pode ser obtido de duas formas principais:
+  . Variável de Template: em conjunto com @ViewChild ou @ViewChildren no componente:
+      // Template
+      <input #campoNome type="text" placeholder="Digite seu nome">
+      <button (click)="focarInput()">Dar Foco no Campo</button>
+
+      // Componente
+      @Component({
+        selector: 'app-root',
+        templateUrl: './app.component.html'
+      })
+      export class AppComponent {
+	@ViewChild('campoNome') inputRef!: ElementRef<HTMLInputElement>;
+
+        focarInput(): void {
+          this.inputRef.nativeElement.focus();
+        }
+      }
+
+  . Injeção de Dependência: riretamente no construtor de uma diretiva ou componente aplicado àquele elemento.
+      // Diretiva
+      @Directive({
+        selector: '[appBordaVermelha]'
+      })
+      export class BordaVermelhaDirective implements OnInit {
+        constructor(private el: ElementRef<HTMLElement>) {}
+
+        ngOnInit(): void {
+          this.el.nativeElement.style.border = '2px solid red';
+        }
+      }
+
+      // Template
+      <p appBordaVermelha>Este parágrafo receberá a borda vermelha.</p>
+
+- document vs ElementRef:
+  . Escopo: enquanto o document.querySelector varre o DOM global e ignora o encapsulamento de componentes — correndo o risco de capturar elementos indesejados caso existam estruturas similares na tela —, a combinação de ElementRef com @ViewChild garante um acesso seguro, exclusivo e estritamente restrito ao escopo do template daquele componente específico. A seguir, um exemplo de violação:
+      <!-- Componente 1: HeaderComponent -->
+      <div class="header">
+        <input #buscaHeader class="campo-busca" placeholder="Buscar no cabeçalho...">
+      </div>
+
+      <!-- Componente 2: SidebarComponent -->
+      <div class="sidebar">
+        <input class="campo-busca" placeholder="Buscar no menu lateral...">
+      </div>
+
+      // HeaderComponent
+      ngAfterViewInit(): void {
+        const input = document.querySelector('.campo-busca') as HTMLInputElement;
+        input.focus();
+      }
+
+      Caso o SidebarComponent seja renderizado antes no DOM global, o querySelector capturará o campo da Barra Lateral em vez do Cabeçalho, ignorando completamente o encapsulamento dos componentes e executando uma varredura desnecessariamente custosa por toda a árvore do DOM.
+
+  . Segurança: a manipulação direta do DOM via document.innerHTML ignora os mecanismos de higienização do Angular, expondo a aplicação a graves vulnerabilidades de Cross-Site Scripting (XSS). Abaixo, um exemplo de violação:
+      // No Componente
+      const payloadMalicioso = `<img src="x" onerror="alert('Ataque XSS: Token roubado!')">`;
+
+      ngAfterViewInit(): void {
+        // Bypassa o Angular e injeta direto no DOM
+        const container = document.getElementById('mensagem');
+        if (container) {
+          container.innerHTML = this.payloadMalicioso;
+        }
+      }
+
+      O navegador tenta carregar a imagem src="x". Como ela não existe, o evento onerror é disparado imediatamente, executando o JavaScript do atacante sem qualquer restrição.
+
+  . Sincronia com a Detecção de Mudanças: a alteração direta do DOM via document contorna a árvore de visualização mantida pelo mecanismo de Change Detection do Angular, o que desincroniza o estado interno da aplicação da interface exibida e pode gerar comportamentos imprevisíveis na tela. Veja um exemplo de violação:
+      // Template
+      <span id="valor-contador">{{ contador }}</span>
+
+      <button (click)="incrementar()">Incrementar (Via Angular)</button>
+      <button (click)="forcarAlteracaoDireta()">Forçar Texto (Via Document)</button>
+
+      // Componente
+      export class ContadorComponent {
+        contador = 0;
+
+        incrementar(): void {
+          this.contador++;
+        }
+
+        forcarAlteracaoDireta(): void {
+          const elemento = document.getElementById('valor-contador');
+          if (elemento) {
+            elemento.innerText = '99';
+          }
+        }
+      }
+
+      1. Estado Inicial: contador = 0. A tela exibe 0.
+      2. O Usuário clica em "Forçar Texto (Via Document)":
+         2.1 O texto na tela muda para 99.
+         2.2 O problema: Para o Angular, o valor da variável this.contador continua sendo 0. O estado interno e a tela agora dizem coisas totalmente diferentes.
+      3. O Usuário clica em "Incrementar (Via Angular)":
+         3.1 O método executa this.contador++ (que passa de 0 para 1).
+         3.2 O Angular dispara o Change Detection para atualizar a tela com o novo valor da variável.
+      4. O Bug Imprevisível na Tela:
+         4.1 A tela, que exibia 99, repentinamente pula para 1, "apagando" o valor 99 que o usuário estava vendo.
+
+- O ElementRef injetado no componente apenas referencia o seu elemento hospedeiro, sem capacidade de criar novos nós no DOM. Para criar elementos dinamicamente, deve-se utilizar o Renderer2.createElement().
+
+33) Projeção de Conteúdo:
+- propósito:
+  . reuso de componentes
+  . responsabilidades bem definidas: um componente recebe a projeção e aqueles que o implementarem projetam nele seus conteúdos
+- <ng-content>: representa o destino do conteúdo a ser projetado em um template
+- o atributo select de <ng-content> filtra o conteúdo a ser projetado, com base em: classe, atributo, tag html e tag angular
+- folhas de estilo devem ser aplicadas na origem da projeção de conteúdo
+
+34) ngcontainer e ngtemplate:
+- <ng-container>: não é renderizável no DOM, apenas seu conteúdo. Invoca o hook ngOnInit.
+- <ng-template>: não é renderizável no DOM, apenas seu conteúdo de forma condicional. Não chama o hook ngOnInit, a menos que seja especificado pela diretiva ngTemplateOutlet em um <ng-container>.
+- o local de renderização no DOM do conteúdo de <ng-template> é definido pela diretiva ngTemplateOutlet em um <ng-container>.
+- é possível para um <ng-container> decidir entre a renderização do conteúdo de um <ng-template> e o conteúdo de outro <ng-template>. Há quatro sintaxes possíveis para isso.
+- é possível componentizar por meio de ng-template e ng-container. Nesse modelo de componentização, um componente pai passa o ng-template para um componente filho por
+  meio de @Input combinado com TemplateRef. A renderização no template filho será correspondente será feita por meio do ng-container e da diretiva ngTemplateOutlet.
+  Por que usar esse modelo de componentização ao invés de ng-content?
+
+35) Cont de Diretivas:
+- atributo host de uma diretiva: basicamente, aplica uma folha de estilo no elemento fornecido à diretiva por meio do seletor de elemento
+- diretiva com seletor de elementos: pq usar seletor de elemento ao invés de seletor de atributo?
+- seletor de elemento vs de atributo
+
+BACKLOG DE ESTUDOS:
+ [attr.class] vs [classname] vs [class] vs [ngclass]
+ disabled
+ Component Lifecycle
+ TypeScript exclamation
+ pure and impure pipes
+ Change Detection
+ Signals
+ ngAfterViewInit vs constructor vs ngOnInit
+ practices
+ json vs literal object
+ BEM e sass
+ styleguide
