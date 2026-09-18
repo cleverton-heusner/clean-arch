@@ -1613,16 +1613,109 @@ Ao invocar um método direto no template, o Angular é forçado a reexecutá-lo 
 - diretiva com seletor de elementos: pq usar seletor de elemento ao invés de seletor de atributo?
 - seletor de elemento vs de atributo
 
+36) Pipes: ?
+37) Template Driven Forms:
+- vantagens: ?
+- diretiva ngModel, já vista anteriormente, será muito útil nos formulários para checar o estado de inputs
+- se o valor referenciado no componente pela diretiva ngModel no template, a sintaxe [] torna-se opcional. Ex.: [ngModel]="Eu" vira ngModel="Eu"
+  (add essa observação no tópico já estudado sobre ngModel para não sobrecarregar este)
+- a presença de ngModel em um controle cria uma instância de FormControl.
+- cada elemento html em um formulário a fazer uso da diretiva ngModel terá uma instância dedicada da classe FormControl
+- para checar se um controle possui um estado inválido ou não, sua classe FormControl correspondente recorre a propriedades específicas, tais como:
+  valid, invalid, disabled, enabled, pristine, dirty, touched, untouched, etc.
+  Para acessar essas propriedades do formulário, o controle HTML precisa receber uma sintaxe especial na forma '#templateVar="ngModel"'. Em seguida, o
+  estado do controle poderá ser acessado no próprio template com a sintaxe 'templateVar.nomeEstado'. É possível acessar o estado do controle também
+  no componente. Para isso, é preciso declarar uma propriedade do tipo NgModel e com o decorator @ViewChild, informando-lhe a variável de template do
+  controle correspondente.
+  Em ambos os tipos de acesso, a sintaxe '#templateVar="ngModel"' deve estar presente no controle em questão.
+- a cada estado do controle será adicionada a ele uma classe CSS. Ex.: ng-dirty, ng-valid, ng-touched, etc.
+- o método hasError de ngModel, herdado de AbstractControlDirective, permite tratar erros com maior especificidade. Ao invés de obter um estado genérico
+  do controle como 'invalid', pode ser necessário descobrir o exato tipo do erro (required, minlenght, etc).
+- conforme o estado de validação assumido por um controle, é possível lhe atribuir um estilo. Uma maneira de fazer isso é por meio da diretiva ngClass. A
+  outra é sobrescrever classes css que são adicionadas automaticamente a um controle por ngModel, como ng-dirty, por exemplo.
+- aplicada na tag form, a diretiva ngForm serve para analisar o estado de um formulário.
+- assim como ngModel cria uma instância da classe FormControl, ngForm cria uma instância da classe FormGroup.
+- enquanto um controle precisa receber manualmente a diretiva ngModel para a instanciação de um FormControl, um formulário já recebe implicitamente a
+  diretiva ngForm. A sintaxe '#templateVar="ngForm"', contudo, precisa ser explicitada.
+- o acesso a cada estado do formulário é feito de forma análoga a um controle, a saber: 'templateVar.nomeEstado'.
+- para que um controle propague seu estado para o formulário que o contém, continua sendo necessária neste controle a presença da diretiva ngModel.
+- se o estado de um controle contido em um formulário estiver inválido, o formulário estará inválido por completo.
+- cada controle gerenciado por um form precisa de um atributo 'name' com valor único, permitindo seu tracking pelo formulário pai. Esse atribuito permitirá
+  acesso a um controle a partir de seu formulário em um componente.
+- a exemplo de NgModel, a diretiva NgGroup pode ser recuperada em um componente graças ao decorator @ViewChild.
+- para a submissão dos dados de um formulário, além fazer uso da sintaxe '#templateVar="ngForm"', será necessário um event binding do tipo ngSubmit recebendo
+  a variável de template. Será necessário também um controle contido no form com o atributo type setado como 'submit' para o envio dos dados. No componente,
+  o tipo do parâmetro do método a recuperar os dados será NgForm, que disponibilizará os dados a partir de um map chamado value.
+- alterações no mapa value da classe NgForm não são propagados para o controle.
+- o reset dos dados é feito de forma parecida. Porém, o event binding pode ser do tipo click. O reset, por segurança, deve ser feito diretamente no componente
+  na instância de NgForm com ajuda do método reset().
+- se necessário, altere o a propriedade updateOn das diretivas ngModelOptions ou ngFormOptions. Isso pode economizar atualizações e validações no modelo de
+  dados pelo Angular.
+- é possível escutar mudanças nos campos em um formulário. Para isso, no componente, deve haver uma instância de NgForm decorada com @ViewChild. Além disso,
+  deve haver um hook apropriado a ouvir as mudanças, como AfterViewInit. No corpo deste hook, deve ser invocado o método subscribe da propriedade valueChanges
+  da instância do NgForm. Para ouvir as mudanças em um controle específico ao invés de todo o formulário, a propriedade decorada deve ser uma instância de
+  NgModel.
+- a diretiva ngModelGroup existe para abstrair regiões de um formulário, facilitando sua leitura e manutenção. Pode-se também obter o estado de uma destas
+  regiões.
+- os campos podem estar em componentes-filhos, estando seus seletores sob um mesmo form. Para que haja um link entre o form e os controles nesses componentes-filhos,
+  configura-se o atributo viewProviders em cada componente-filho contido no form.
+- validadores cutomizados síncronos:
+    . será necessário uma diretiva implementando Validator e registrada como validador por meio de seu atributo providers e do injection token NG_VALIDATORS. Somente
+      assim o Angular saberá que se trata de um validator;
+    . FormControl estende AbstractControl, que possui uma propriedade chamada value, que irá receber o valor a ser validado no método validate da interface Validator;
+    . se o valor for válido, null será retornado. Do contrário, será retornada uma chave com um booleano;
+    . além de conter a diretiva, o controle do template a ser validado poderá renderizar o erro com ajuda do método hasError de FormControl;
+    . quando uma validação envolver múltiplos controles, a diretiva do validador deve ser referenciada pelo form por eles compartilhado.
+- validadores assíncronos:
+    . se a propriedade pending do FormControl estiver true, a validação ainda não foi concluída.
+    . a diretiva referente ao validador customizado assíncrono deve implementar a interface AsyncValidator.
+    . o método validate, ao invés de retornar uma instância ValidationErros diretamente em caso de erros da validação, devolverá um Observable<ValidationErros>.
+    . também é necessária a presença da propriedade providers na diretiva, mas o injection token a ser usado é NG_ASYNC_VALIDATORS.
+
 BACKLOG DE ESTUDOS:
- [attr.class] vs [classname] vs [class] vs [ngclass]
- disabled
- Component Lifecycle
- TypeScript exclamation
- pure and impure pipes
- Change Detection
- Signals
- ngAfterViewInit vs constructor vs ngOnInit
- practices
- json vs literal object
- BEM e sass
- styleguide
+[attr.class] vs [classname] vs [class] vs [ngClass]
+disabled
+Component Lifecycle
+TypeScript exclamation
+pure/puro and impure/impuro pipes
+Change Detection
+Signals
+ngAfterViewInit vs constructor vs ngOnInit
+practices
+json vs literal object
+BEM e sass
+styleguide
+? os capítulos 8, 9, 11 deveriam ser subtópicos de um só capítulo chamdado view encapsulation. Deveria haver também aqui distinção entre as políticas de encapsulamento, como emulated.
+? os capítulos 20 e 21 deveriam vir logo apos do cap 18, sobre @input. O cap 19 de @output deveria ser o cap 21
+? no capitulo 12, diga como visualizar a árvore DOM produzida pelo navegador
+? no capitulo 14, vale a pena dizer como saber o tipo apropriado do elemento para o cast: console.log((event.target as any).constructor.name);
+? TS: uso de ?? x ||
+? TS: readonly vs const
+? TS: onde usar let
+? TS: sintaxe com '!':. Ex.: 'nomePlano!: string';
+? O tópico '22) Two Way Data Binding' contem erros. Revise-o;
+? No tópico '22) Two Way Data Binding', adicione que na sintaxe expandida, não é necessário extrair o valor de event. O próprio event ja traz o valor final. Ex. de antes e depois:
+// ANTES:
+onQuantidadeLicencasAlterada(event: Event): void {
+const novaQuantidadeLicencas = (event.target as HTMLInputElement).valueAsNumber;
+this.quantidadeLicencas = novaQuantidadeLicencas;
+}  // DEPOIS:
+onQuantidadeLicencasAlterada(novaQuantidadeLicencas: number): void {
+this.quantidadeLicencas = novaQuantidadeLicencas;
+}
+? No tópico 23 sobre ngIf, os exemplos de ng-template não são bons. Troque-os por:
+// Criar o bloco else (ou then) do *ngIf:  // Reutilizar blocos de HTML no mesmo arquivo:
+<ng-template #mensagemSucesso>
+Operação realizada com sucesso.
+<ng-container
+*ngTemplateOutlet="mensagemSucesso">
+? ng-template vs ng-container: O ng-template representa um trecho de template que pode vir a ser renderizado no futuro, mas que não existe inicialmente no DOM. Já o ng-container representa apenas um agrupamento lógico de elementos que serão renderizados imediatamente, sem gerar uma tag correspondente no DOM.
+? ngAfterViewInit x ngAfterViewChecked
+? o topico de diretivas deveria ser antes de @ViewChild
+? no topocio sobre diretiva, o comando de criacao de diretiva esta errado:
+ERRADO: npx ng c d nome-diretiva
+CERTO: npx ng g d nome-diretiva
+? atalho vscode:
+importar classe: ctrl + .
+remover imports nao usados: alt + shift + O
+? significado de @Injectable({providedIn: 'root'})
